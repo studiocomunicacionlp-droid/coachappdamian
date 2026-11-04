@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>12 Semanas</title>
 <meta name="description" content="Tu rutina de 12 semanas, armada por tu profe.">
 <meta name="theme-color" content="#0a0a09">
@@ -538,6 +538,9 @@ h1,h2,h3{font-family:var(--disp);font-weight:900;text-transform:uppercase;line-h
 .seg.full button{padding:11px 8px;font-size:15px}
 body:has(.rest.show) .toast{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 .stack>.field{flex:none}
+html,body{overflow-x:clip;max-width:100%;overscroll-behavior-x:none}
+body{touch-action:pan-y pinch-zoom}
+@media (max-width:820px){input,select,textarea{font-size:16px!important}}
 .seg.six{grid-template-columns:repeat(3,minmax(0,1fr));border-radius:24px}
 .seg.six button{position:relative}
 .ndot{position:absolute;top:7px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--hot)}
