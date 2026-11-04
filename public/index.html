@@ -637,6 +637,7 @@ function pad(n){return String(n).padStart(2,'0')}
 function withIds(plan){return plan.map(w=>({...w,days:w.days.map(d=>({...d,exercises:d.exercises.map(e=>({notes:'',weight:'',...e,id:uid()}))}))}))}
 const emptyPlan=()=>Array.from({length:12},(_,i)=>({week:i+1,phase:'Base',days:Array.from({length:5},(_,j)=>({name:'Día '+(j+1),exercises:[]}))}));
 
+function setDays(plan,n){plan.forEach(w=>{if(w.days.length>n)w.days.splice(n);while(w.days.length<n)w.days.push({name:'Día '+(w.days.length+1),exercises:[]});w.days.forEach((d,i)=>d.name='Día '+(i+1))})}
 function defaultTemplates(){return [
   {id:'t-glu',name:'Glúteo 12 semanas',desc:'5 días · Base → Hipertrofia → Fuerza → Densidad → Pico, con deload cada 4',plan:withIds(SEED_PLAN)},
   {id:'t-emp',name:'Plan en blanco',desc:'12 semanas × 5 días para armar desde cero',plan:emptyPlan()}]}
@@ -1329,6 +1330,7 @@ function trainerList(){
       <div class="row"><div class="field"><label for="nf-start">Fecha de inicio</label><input id="nf-start" type="date" value="${TODAY}"></div>
         <div class="field"><label for="nf-goal">Objetivo</label><input id="nf-goal" placeholder="Ej: hipertrofia tren inferior"></div>
         <div class="field"><label for="nf-price">Precio del plan (3 meses)</label><input id="nf-price" inputmode="numeric" value="90000"></div></div>
+      <div class="field" style="max-width:220px"><label for="nf-days">Días por semana</label><select id="nf-days"><option value="">Como la plantilla</option>${[2,3,4,5,6].map(n=>`<option value="${n}">${n} días</option>`).join('')}</select></div>
       <div class="field"><label for="nf-tpl">Arrancar con</label><select id="nf-tpl">${db.templates.map(t=>`<option value="t:${t.id}">Plantilla: ${esc(t.name)}</option>`).join('')}${db.students.map(s=>`<option value="s:${s.id}">Copia del plan de ${esc(s.name)}</option>`).join('')}<option value="e:">Plan en blanco</option></select></div>
       <div class="row"><button class="btn y" id="nf-save">Crear alumno</button><button class="btn ghost" id="nf-cancel">Cancelar</button></div>
     </div>
@@ -1354,7 +1356,7 @@ function trainerList(){
     const email=$('#nf-email').value.trim(); if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Escribí el email del alumno: lo usa para entrar');$('#nf-email').focus();return}
     const [k,id]=$('#nf-tpl').value.split(':'),src=k==='t'?db.templates.find(t=>t.id===id)?.plan:k==='s'?db.students.find(s=>s.id===id)?.plan:null;
     const start=$('#nf-start').value||TODAY;
-    const s={id:uid(),name,email,start,goal:$('#nf-goal').value.trim(),plan:withIds(clone(src||emptyPlan())),logs:{},history:[],rpe:{},notes:'',measures:[],
+    const s={id:uid(),name,email,start,goal:$('#nf-goal').value.trim(),plan:(()=>{const pl=withIds(clone(src||emptyPlan())),nd=+$('#nf-days').value;if(nd)setDays(pl,nd);return pl})(),logs:{},history:[],rpe:{},notes:'',measures:[],
       billing:{start,end:addD(start,84),price:parseFloat($('#nf-price').value.replace(/\./g,''))||0,payments:[]},remind:{on:false,days:[1,2,3,4,5],time:'18:00',tz:TZ}};
     const btn=$('#nf-save');btn.disabled=true;
     try{await flush();const r=await API('students',{body:{student:s}});db.students.push(r.student);snap.students.push(clone(r.student));
@@ -1426,7 +1428,7 @@ function planEditor(s,isTpl){
       <div class="row" style="gap:12px"><h2 style="font-size:30px">Semana ${w.week}</h2>
         <select id="phase" aria-label="Fase de la semana">${Object.keys(PHASES).map(p=>`<option ${p===w.phase?'selected':''}>${p}</option>`).join('')}</select>
         <span class="lbl">Volumen semanal ${vol} reps</span></div>
-      <div class="row" style="gap:6px"><button class="btn sm" id="copyNext">${ICON.copy}Copiar a semana ${w.week+1}</button><button class="btn sm" id="addDay">${ICON.plus}Día</button></div>
+      <div class="row" style="gap:6px"><button class="btn sm" id="copyNext">${ICON.copy}Copiar a semana ${w.week+1}</button><select id="ndays" class="timein" style="border-radius:999px;padding:6px 12px" aria-label="Días por semana">${[1,2,3,4,5,6,7].map(n=>`<option value="${n}" ${n===w.days.length?'selected':''}>${n} día${n>1?'s':''} por semana</option>`).join('')}</select><button class="btn sm" id="addDay">${ICON.plus}Día</button>${w.days.length>1?`<button class="btn sm warn" id="delDay">${ICON.x}Quitar día ${S.day+1}</button>`:''}</div>
     </div>
     <div class="daytabs">${w.days.map((dd,i)=>`<button class="dt ${i===S.day?'on':''}" data-d="${i}">Día ${i+1}${!isTpl&&dayDone(s,dd)?'<span class="ok">✓</span>':''}</button>`).join('')}</div>
     <div>
@@ -1450,6 +1452,11 @@ function planEditor(s,isTpl){
   bindPeri(s);
   $$('.dt').forEach(b=>b.onclick=()=>{S.day=+b.dataset.d;render()});
   $('#phase').onchange=e=>{w.phase=e.target.value;save();render();toast('Fase actualizada')};
+  $('#ndays').onchange=e=>{const n=+e.target.value,lost=s.plan.reduce((a,ww)=>a+ww.days.slice(n).reduce((b,dd)=>b+dd.exercises.length,0),0);
+    if(lost&&!confirm(`Se van a quitar los días ${n+1} en adelante de las 12 semanas (${lost} ejercicios). ¿Seguimos?`)){render();return}
+    setDays(s.plan,n);S.day=Math.min(S.day,n-1);save();render();toast(n+' días por semana en todo el plan')};
+  $('#delDay')&&($('#delDay').onclick=()=>{if(d.exercises.length&&!confirm(`¿Quitar el día ${S.day+1} de la semana ${w.week}? Tiene ${d.exercises.length} ejercicios.`))return;
+    w.days.splice(S.day,1);w.days.forEach((dd,i)=>dd.name='Día '+(i+1));S.day=Math.max(0,S.day-1);save();render();toast('Día quitado')});
   $('#addDay').onclick=()=>{w.days.push({name:'Día '+(w.days.length+1),exercises:[]});S.day=w.days.length-1;save();render()};
   $('#copyNext').onclick=()=>{const n=s.plan[S.week+1];if(!n){toast('Es la última semana');return}
     n.phase=w.phase;n.days=w.days.map(dd=>({name:dd.name,exercises:dd.exercises.map(e=>({...e,id:uid()}))}));save();S.week++;render();toast('Semana '+n.week+' reemplazada con la anterior')};
