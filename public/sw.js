@@ -1,6 +1,7 @@
 // Service worker: deja la app instalable, la abre rápido y muestra las notificaciones.
-const V = 'gym-v1';
-const SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/badge-72.png'];
+const V = 'gym-v2';
+const SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/badge-72.png',
+  '/img/abduct.webp','/img/bench.webp','/img/cablecurl.webp','/img/cablerow.webp','/img/calf.webp','/img/crunch.webp','/img/dbrow.webp','/img/deadbug.webp','/img/deadlift.webp','/img/dip.webp','/img/facepull.webp','/img/fly.webp','/img/hammer.webp','/img/hipthrust.webp','/img/hipthrust1.webp','/img/incpress.webp','/img/kick.webp','/img/lateral.webp','/img/legcurl.webp','/img/legext.webp','/img/legpress.webp','/img/lunge.webp','/img/mountain.webp','/img/pallof.webp','/img/plank.webp','/img/pulldown.webp','/img/pullthrough.webp','/img/pullup.webp','/img/rdl.webp','/img/seatedcurl.webp','/img/shpress.webp','/img/sideplank.webp','/img/split.webp','/img/squat.webp','/img/squatbb.webp','/img/stepup.webp','/img/tri.webp'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(V).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
