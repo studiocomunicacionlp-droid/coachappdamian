@@ -730,6 +730,8 @@ function rutinaNov(){
 const MSG_NOV='Esta rutina se repite 3 semanas y la cuarta es de descarga. Los ejercicios 1 y 2 de cada día son los principales: ahí vas subiendo el peso. Si el rango es 6–8, usá un peso con el que hagas 8; cuando completes todas las series de 8, la semana siguiente subís. Si con el peso nuevo no llegás a 8 en todas, mantenelo hasta lograrlo. En los demás ejercicios no te exijas subir: priorizá la técnica.';
 function runMigrations(){
   const c=CT(),done=c.migrations||(c.migrations=[]);
+  if(!done.includes('inicio-10nov')){done.push('inicio-10nov');
+    db.students.filter(s=>/^(cintia|luc[ií]a)\b/i.test((s.name||'').trim())).forEach(s=>{const st='2026-11-10';s.start=st;s.billing=s.billing||{payments:[]};s.billing.start=st;s.billing.end=addD(st,84)});save()}
   if(done.includes('rutina-nov-2026'))return;
   done.push('rutina-nov-2026');
   db.templates.push({id:uid(),name:'Cintia | Lucia · noviembre',desc:'5 días · 3 semanas de carga progresiva + 1 de descarga',plan:rutinaNov()});
@@ -1003,9 +1005,10 @@ function studentDay(){
         <div class="rpe-scale" role="group" aria-label="Esfuerzo del 1 al 10">${Array.from({length:10},(_,k)=>`<button data-rpe="${k+1}" class="${rv===k+1?'on':''}" aria-pressed="${rv===k+1}">${k+1}</button>`).join('')}</div>
         <div class="rpe-ends"><span>Muy fácil</span><span>Al máximo</span></div>
         <p class="mute" style="font-size:12px;margin:0">Tu profe lo ve y ajusta las cargas de la semana que viene.</p></div>`:''}
-    ${dn&&S.day<w.days.length-1?`<button class="btn y" id="next" style="align-self:flex-start">Ir al día ${S.day+2} →</button>`:''}
+    ${dn?`<div class="row">${S.day<w.days.length-1?`<button class="btn y" id="next">Ir al día ${S.day+2} →</button>`:''}<button class="btn ${S.day<w.days.length-1?'':'y'}" id="home">${ICON.back}Volver al inicio</button></div>`:''}
   </div>`;
   $('#back').onclick=()=>goBack(()=>{S.view='home'});
+  $('#home')&&($('#home').onclick=()=>{S.view='home';S.stab='rutina';render();scrollTo(0,0)});
   $('#next')&&($('#next').onclick=()=>{S.day++;render();scrollTo(0,0)});
   const ex=id=>d.exercises.find(x=>x.id===id),L=id=>s.logs[id]||(s.logs[id]={sets:[]});
   const lastSet=(e,k)=>k===e.sets-1;
