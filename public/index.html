@@ -728,15 +728,27 @@ function rutinaNov(){
   return Array.from({length:12},(_,w)=>w<4?{week:w+1,phase:w===3?'Deload':w===0?'Base':'Carga',days:mk(w===3)}:{week:w+1,phase:'Base',days:RUT_NOV.map(([name])=>({name,exercises:[]}))});
 }
 const MSG_NOV='Esta rutina se repite 3 semanas y la cuarta es de descarga. Los ejercicios 1 y 2 de cada día son los principales: ahí vas subiendo el peso. Si el rango es 6–8, usá un peso con el que hagas 8; cuando completes todas las series de 8, la semana siguiente subís. Si con el peso nuevo no llegás a 8 en todas, mantenelo hasta lograrlo. En los demás ejercicios no te exijas subir: priorizá la técnica.';
+const APROX='Antes de las series: 1 serie de 8 reps con el 50–60% del peso que venís usando, después 1 serie de 4 reps con el 75–80%. Recién ahí poné tu peso de trabajo y hacé las series indicadas.';
+const PREA={0:['Camilla femoral · preactivación','legcurl'],2:['Patada en polea · preactivación','kick'],4:['Extensión de cuádriceps · preactivación','legext']};
+function addActivation(){
+  const pls=[...db.students.filter(s=>/^(cintia|luc[ií]a)\b/i.test((s.name||'').trim())).map(s=>s.plan),...db.templates.filter(t=>t.name==='Cintia | Lucia · noviembre').map(t=>t.plan)];
+  pls.forEach(pl=>pl.forEach(w=>w.days.forEach((d,di)=>{
+    if(!d.exercises.length||d.exercises.some(e=>/preactivación/.test(e.name)))return;
+    const f=d.exercises[0];f.notes=APROX+' '+(f.notes||'');
+    if(PREA[di]&&w.days.length===5)d.exercises.unshift({id:uid(),name:PREA[di][0],sets:1,reps:'15–20',weight:'',pic:PREA[di][1],notes:'Una sola serie, peso tranqui. Controlá la bajada (fase excéntrica), aguantando el peso.'});
+  })));
+  save();
+}
 function runMigrations(){
   const c=CT(),done=c.migrations||(c.migrations=[]);
   if(!done.includes('inicio-10nov')){done.push('inicio-10nov');
     db.students.filter(s=>/^(cintia|luc[ií]a)\b/i.test((s.name||'').trim())).forEach(s=>{const st='2026-11-10';s.start=st;s.billing=s.billing||{payments:[]};s.billing.start=st;s.billing.end=addD(st,84)});save()}
-  if(done.includes('rutina-nov-2026'))return;
+  if(done.includes('rutina-nov-2026')){if(!done.includes('activacion-nov')){done.push('activacion-nov');addActivation()}return}
   done.push('rutina-nov-2026');
   db.templates.push({id:uid(),name:'Cintia | Lucia · noviembre',desc:'5 días · 3 semanas de carga progresiva + 1 de descarga',plan:rutinaNov()});
   const hit=db.students.filter(s=>/^(cintia|luc[ií]a)\b/i.test((s.name||'').trim()));
   hit.forEach(s=>{s.plan=rutinaNov();s.notes=MSG_NOV});
+  done.push('activacion-nov');addActivation();
   save();
   setTimeout(()=>toast(hit.length?'Rutina nueva cargada para '+hit.map(s=>s.name).join(' y '):'Plantilla nueva lista: “Cintia | Lucia · noviembre”'),600);
 }
