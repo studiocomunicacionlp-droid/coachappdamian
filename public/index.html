@@ -713,10 +713,35 @@ setInterval(()=>{document.visibilityState==='visible'&&refresh()},30000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();else flush(true)});
 addEventListener('pagehide',()=>flush(true));
 function loggedOut(){try{localStorage.removeItem(CK)}catch(e){}ME=null;db=normData({});snap=clone(db);NAV.length=0;stopRest();S={...S,role:null,sid:null,view:'home',week:0,day:0,tab:'plan',stab:'rutina',ttab:'alumnos',open:{}};try{history.replaceState(null,'',location.pathname)}catch(e){}render()}
+/* ===== cargas hechas a pedido (se aplican una sola vez, desde el panel del profe) ===== */
+const P1='Principal: subí el peso cuando completes todas las series con el máximo de reps. Si no llegás, mantené el peso.';
+const ACC='Accesorio: no hace falta subir el peso. Priorizá técnica, buena ejecución y conexión mente-músculo.';
+const RUT_NOV=[
+ ['Lunes · Glúteos y cuádriceps',[['Hip thrust con barra',4,'6–8','hipthrust'],['Prensa a 45°',3,'8–10','legpress'],['Sentadilla búlgara',2,'8–10 c/pierna','split'],['Abducción en máquina',3,'20','abduct']]],
+ ['Martes · Tren superior y abdomen',[['Press de pecho con mancuernas',3,'8–10','bench'],['Remo con pecho apoyado',3,'8–12','dbrow'],['Jalón al pecho',3,'8–12','pulldown'],['Elevaciones laterales',3,'12–20','lateral'],['Crunch inverso',3,'10–15','crunch'],['Bicho muerto',3,'8–10 c/lado','deadbug']]],
+ ['Miércoles · Glúteos y cadena posterior',[['Peso muerto rumano',3,'8–10','rdl'],['Sentadilla en Smith',3,'8–10','squatbb'],['Curl femoral sentado',3,'10–12','seatedcurl'],['Patada de glúteo en polea',3,'12–15 c/pierna','kick'],['Plancha lateral',3,'40 s c/lado','sideplank']]],
+ ['Jueves · Tren superior y cardio',[['Press de hombros en máquina',3,'8–12','shpress'],['Remo unilateral en polea',3,'10–12','cablerow'],['Press inclinado con mancuernas',3,'8–12','incpress'],['Face pull',2,'12–20','facepull'],['Curl de bíceps',2,'10–15','cablecurl'],['Extensión de tríceps',2,'10–15','tri'],['Caminata',1,'20–25 min','']]],
+ ['Viernes · Glúteos y complementario',[['Step-up o prensa unilateral',3,'10–12 c/pierna','stepup'],['Hip thrust en máquina',3,'10–12','hipthrust'],['Abducción en máquina',3,'25','abduct'],['Patada de glúteo en polea',2,'15 c/pierna','kick'],['Crunch inverso',3,'10–15','crunch']]]];
+function rutinaNov(){
+  const mk=deload=>RUT_NOV.map(([name,ex])=>({name,exercises:ex.map(([n,sets,reps,pic],i)=>({id:uid(),name:n,sets:deload&&sets>1?sets-1:sets,reps,weight:'',pic,
+    notes:deload?'Semana de descarga: bajá el peso un 20–30% y enfocate en la técnica.':n==='Caminata'?'Después de las pesas.':i<2?P1:ACC}))}));
+  return Array.from({length:12},(_,w)=>w<4?{week:w+1,phase:w===3?'Deload':w===0?'Base':'Carga',days:mk(w===3)}:{week:w+1,phase:'Base',days:RUT_NOV.map(([name])=>({name,exercises:[]}))});
+}
+const MSG_NOV='Esta rutina se repite 3 semanas y la cuarta es de descarga. Los ejercicios 1 y 2 de cada día son los principales: ahí vas subiendo el peso. Si el rango es 6–8, usá un peso con el que hagas 8; cuando completes todas las series de 8, la semana siguiente subís. Si con el peso nuevo no llegás a 8 en todas, mantenelo hasta lograrlo. En los demás ejercicios no te exijas subir: priorizá la técnica.';
+function runMigrations(){
+  const c=CT(),done=c.migrations||(c.migrations=[]);
+  if(done.includes('rutina-nov-2026'))return;
+  done.push('rutina-nov-2026');
+  db.templates.push({id:uid(),name:'Cintia | Lucia · noviembre',desc:'5 días · 3 semanas de carga progresiva + 1 de descarga',plan:rutinaNov()});
+  const hit=db.students.filter(s=>/^(cintia|luc[ií]a)\b/i.test((s.name||'').trim()));
+  hit.forEach(s=>{s.plan=rutinaNov();s.notes=MSG_NOV});
+  save();
+  setTimeout(()=>toast(hit.length?'Rutina nueva cargada para '+hit.map(s=>s.name).join(' y '):'Plantilla nueva lista: “Cintia | Lucia · noviembre”'),600);
+}
 function enter(user){
   ME=user;S.role=user.role;S.open={};
   if(user.role==='alumno'){S.sid=user.sid;const s=stu();S.week=s?curWeek(s):0;S.view='home';S.stab='rutina'}
-  else{S.view='list';S.ttab='alumnos'}
+  else{S.view='list';S.ttab='alumnos';runMigrations()}
 }
 async function loadData(){
   const c=cached();
