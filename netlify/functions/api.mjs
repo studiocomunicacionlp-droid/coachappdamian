@@ -140,11 +140,13 @@ export default async (req, context) => {
     if (seg[0] === 'students' && seg.length === 2 && M === 'DELETE' && profe) {
       const s = await getJSON('students/' + seg[1]);
       if (!s) return json({ ok: true });
-      const u = await getJSON(userKey(s.email));
-      if (u && u.role === 'alumno') { await del(userKey(s.email)); await del(pushKey(s.email)); }
-      const photos = await listKeys('photos/' + s.id + '/');
-      await Promise.all(photos.map(del));
+      const safe = async (what, fn) => { try { await fn(); } catch (e) { console.error('borrar alumno:', what, e); } };
       await del('students/' + s.id);
+      if (s.email) {
+        await safe('cuenta', async () => { const u = await getJSON(userKey(s.email)); if (u && u.role === 'alumno') await del(userKey(s.email)); });
+        await safe('avisos', () => del(pushKey(s.email)));
+      }
+      await safe('fotos', async () => { const photos = await listKeys('photos/' + s.id + '/'); for (const k of photos) await del(k); });
       return json({ ok: true });
     }
 
