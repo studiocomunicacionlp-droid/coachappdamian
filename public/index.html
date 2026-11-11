@@ -1414,10 +1414,10 @@ function trainerList(){
     const start=$('#nf-start').value||TODAY;
     const s={id:uid(),name,email,start,goal:$('#nf-goal').value.trim(),plan:(()=>{const pl=withIds(clone(src||emptyPlan())),nd=+$('#nf-days').value;if(nd)setDays(pl,nd);return pl})(),logs:{},history:[],rpe:{},notes:'',measures:[],
       billing:{start,end:addD(start,84),price:parseFloat($('#nf-price').value.replace(/\./g,''))||0,payments:[]},remind:{on:false,days:[1,2,3,4,5],time:'18:00',tz:TZ}};
-    const btn=$('#nf-save');btn.disabled=true;
-    try{await flush();const r=await API('students',{body:{student:s}});db.students.push(r.student);snap.students.push(clone(r.student));
+    const btn=$('#nf-save'),lbl=btn.textContent;btn.disabled=true;
+    try{await flush();let r;for(let i=0;;i++){try{r=await API('students',{body:{student:s}});break}catch(e){if(i>=2||(e.status&&e.status<500))throw e;btn.textContent='Reintentando…';await new Promise(ok=>setTimeout(ok,1500*(i+1)))}}btn.textContent=lbl;db.students.push(r.student);snap.students.push(clone(r.student));
       Object.assign(S,{sid:s.id,view:'student',week:0,day:0,tab:'plan'});S.open.code={sid:s.id,code:r.code,isNew:true};render();scrollTo(0,0);toast('Alumno creado')}
-    catch(e){btn.disabled=false;toast(e.message)}
+    catch(e){btn.disabled=false;btn.textContent=lbl;toast(e.message)}
   };
   $$('[data-al]').forEach(b=>b.onclick=()=>{const a=al[+b.dataset.al];S.sid=a.s.id;Object.assign(S,{view:'student',week:curWeek(a.s),day:0,tab:a.tab});render();scrollTo(0,0)});
   $$('.rrow').forEach(b=>b.onclick=()=>{S.sid=b.dataset.id;const s=stu();Object.assign(S,{view:'student',week:curWeek(s),day:0,tab:'plan'});render();scrollTo(0,0)});

@@ -15,9 +15,19 @@ export function store() {
   return _store;
 }
 
-export const getJSON = (key) => store().get(key, { type: 'json' });
-export const setJSON = (key, v) => store().setJSON(key, v);
-export const del = (key) => store().delete(key);
+// Reintenta si Netlify Blobs falla un instante (red o límite momentáneo).
+export async function retry(fn, tries = 4) {
+  for (let i = 0; ; i++) {
+    try { return await fn(); } catch (e) {
+      if (i >= tries - 1) throw e;
+      console.warn('blobs reintento', i + 1, e?.message);
+      await new Promise((r) => setTimeout(r, 150 * 2 ** i + Math.random() * 100));
+    }
+  }
+}
+export const getJSON = (key) => retry(() => store().get(key, { type: 'json' }));
+export const setJSON = (key, v) => retry(() => store().setJSON(key, v));
+export const del = (key) => retry(() => store().delete(key));
 
 export async function listKeys(prefix) {
   const out = [];
@@ -34,14 +44,14 @@ export async function listJSON(prefix) {
 // Lee, modifica y guarda un documento sin pisar cambios que lleguen al mismo tiempo.
 export async function updateJSON(key, fn, { create = false } = {}) {
   for (let i = 0; i < 8; i++) {
-    const cur = await store().getWithMetadata(key, { type: 'json' });
+    const cur = await retry(() => store().getWithMetadata(key, { type: 'json' }));
     if (!cur && !create) return null;
     const doc = cur ? cur.data : undefined;
     const next = await fn(doc);
     if (next === undefined) return doc;
-    const res = cur
-      ? await store().setJSON(key, next, { onlyIfMatch: cur.etag })
-      : await store().setJSON(key, next, { onlyIfNew: true });
+    const res = await retry(() => cur
+      ? store().setJSON(key, next, { onlyIfMatch: cur.etag })
+      : store().setJSON(key, next, { onlyIfNew: true }));
     if (res.modified !== false) return next;
     await new Promise((r) => setTimeout(r, 40 + Math.random() * 120));
   }

@@ -1,4 +1,5 @@
-import { getJSON, setJSON, del, store, listJSON, listKeys, updateJSON, secrets } from '../lib/store.mjs';
+import crypto from 'node:crypto';
+import { getJSON, setJSON, del, store, listJSON, listKeys, updateJSON, secrets, retry } from '../lib/store.mjs';
 import { normEmail, userKey, hashPassword, checkPassword, accessCode, sessionCookie, clearCookie, currentUser } from '../lib/auth.mjs';
 import { allowed, applyOp, exName } from '../lib/logic.mjs';
 import { addSub, removeSub, notify, notifyProfes, pushKey } from '../lib/push.mjs';
@@ -117,15 +118,27 @@ export default async (req, context) => {
     // alta de alumno: crea su ficha y su cuenta, y devuelve el código de acceso
     if (path === 'students' && M === 'POST' && profe) {
       const { student } = await body(req);
-      if (!student || !ID.test(student.id || '')) return fail('Datos inválidos');
+      if (!student || typeof student !== 'object') return fail('No llegaron los datos del alumno, probá de nuevo');
+      if (!ID.test(student.id || '')) student.id = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+      if (!String(student.name || '').trim()) return fail('Escribí el nombre del alumno');
       const email = normEmail(student.email);
-      if (!EMAIL.test(email)) return fail('Escribí el email del alumno, lo usa para entrar');
-      if (await getJSON(userKey(email))) return fail('Ya hay alguien con ese email', 409);
+      if (!EMAIL.test(email)) return fail('Ese email no es válido. Revisá que esté bien escrito (ej: nombre@gmail.com)');
+      const prev = await getJSON(userKey(email));
+      if (prev) {
+        // cuenta que quedó sola (alumno borrado o alta que se cortó a la mitad): se reutiliza
+        const orphan = prev.role === 'alumno' && !(await getJSON('students/' + prev.sid));
+        if (!orphan) return fail(prev.role === 'profe' ? 'Ese email es el de la cuenta del profe, usá otro' : 'Ya hay un alumno con ese email', 409);
+      }
       const code = accessCode();
       const doc = { ...student, email, created: Date.now() };
-      const r = await store().setJSON('students/' + student.id, doc, { onlyIfNew: true });
-      if (r.modified === false) return fail('Ese alumno ya existe', 409);
-      await setJSON(userKey(email), { email, name: student.name, role: 'alumno', sid: student.id, v: 0, ...hashPassword(code) });
+      const r = await retry(() => store().setJSON('students/' + student.id, doc, { onlyIfNew: true }));
+      if (r && r.modified === false) return fail('Ese alumno ya existe, actualizá la página', 409);
+      try {
+        await setJSON(userKey(email), { email, name: student.name, role: 'alumno', sid: student.id, v: 0, ...hashPassword(code) });
+      } catch (e) {
+        await del('students/' + student.id).catch(() => {});
+        throw e;
+      }
       return json({ student: doc, code });
     }
     if (seg[0] === 'students' && seg[2] === 'code' && M === 'POST' && profe) {
@@ -201,7 +214,7 @@ export default async (req, context) => {
     return fail('No encontrado', 404);
   } catch (e) {
     console.error(e);
-    return fail(e.message === 'conflict' ? 'Hubo un cruce de cambios, probá de nuevo' : 'Error del servidor', 500);
+    return fail(e.message === 'conflict' ? 'Hubo un cruce de cambios, probá de nuevo' : 'No se pudo guardar por un problema momentáneo. Esperá unos segundos y probá de nuevo.', 500);
   }
 };
 
