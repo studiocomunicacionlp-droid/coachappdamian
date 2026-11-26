@@ -746,8 +746,19 @@ function addActivation(){
   })));
   save();
 }
+const NOTA_S4='Semana de descarga: usá los mismos pesos que hiciste en la semana 1 y enfocate en la técnica.';
+function pesos45(){
+  db.students.filter(s=>/^(cintia|luc[ií]a)\b/i.test((s.name||'').trim())).forEach(s=>{
+    const w3=s.plan[2],w4=s.plan[3],w5=s.plan[4];if(!w4||!w5)return;
+    w4.from=1;w4.days.forEach(d=>d.exercises.forEach(e=>{if(/^Semana de descarga/.test(e.notes||''))e.notes=NOTA_S4}));
+    if(w3&&!w5.days.some(d=>d.exercises.length)){w5.phase=w3.phase;w5.days=w3.days.map(dd=>({name:dd.name,exercises:dd.exercises.map(e=>({...e,id:uid()}))}))}
+    w5.from=3;
+  });
+  save();
+}
 function runMigrations(){
   const c=CT(),done=c.migrations||(c.migrations=[]);
+  if(!done.includes('pesos-sem4-5')&&done.includes('rutina-nov-2026')){done.push('pesos-sem4-5');pesos45()}
   if(!done.includes('inicio-10nov')){done.push('inicio-10nov');
     db.students.filter(s=>/^(cintia|luc[ií]a)\b/i.test((s.name||'').trim())).forEach(s=>{const st='2026-11-10';s.start=st;s.billing=s.billing||{payments:[]};s.billing.start=st;s.billing.end=addD(st,84)});save()}
   if(done.includes('rutina-nov-2026')){if(!done.includes('activacion-nov')){done.push('activacion-nov');addActivation()}return}
@@ -780,6 +791,8 @@ function curWeek(s){const i=s.plan.findIndex(w=>wkStats(s,w).p<1);return i<0?s.p
 const dayDone=(s,d)=>d.exercises.length>0&&d.exercises.every(e=>isDone(s,e));
 function todayIdx(s,wi){const w=s.plan[wi];return w?w.days.findIndex(d=>!dayDone(s,d)):-1}
 function suggest(s,wi,di,name){
+  const fw=+s.plan[wi]?.from;
+  if(fw>0&&fw-1<wi){const src=s.plan[fw-1],e=src?.days[di]?.exercises.find(x=>x.name===name),l=e&&s.logs[e.id];return l&&l.kg?l.kg:null}
   const prev=s.plan[wi-1]; if(!prev)return null;
   const e=prev.days[di]?.exercises.find(x=>x.name===name); const l=e&&s.logs[e.id];
   if(!l||!l.kg)return null; return isDone(s,e)?Math.round(l.kg*1.025*2)/2:l.kg;
@@ -1002,7 +1015,7 @@ function studentDay(){
     <div class="stack" style="gap:14px">${d.exercises.map((e,i)=>{if(e.run){const ok=isDone(s,e);return `<article class="ex runex ${ok?'done':''}" id="ex-${e.id}"><div class="ex-top"><span class="th runic">${ICON.run}</span><div style="min-width:0;flex:1"><h3 class="ex-name">Running</h3>${ok?'<div class="ex-rx"><span class="pill ok">✓ Hecho</span></div>':''}</div></div>
         <div class="runtxt">${nl(e.text||'Tu profe todavía no cargó el detalle.')}</div>
         <button class="btn ${ok?'':'y'} set" data-id="${e.id}" data-k="0" style="width:auto;height:auto;border-radius:999px;align-self:flex-start;font-family:var(--body);font-size:15px;padding:12px 20px" aria-pressed="${ok}">${ok?'✓ Hecho · tocá para desmarcar':'Marcar como hecho'}</button></article>`}const l=s.logs[e.id]||{},sets=l.sets||[],sg=suggest(s,S.week,S.day,e.name),ok=isDone(s,e);
-      const tw=parseFloat(String(e.weight||'').replace(',','.')),rec=!isNaN(tw)?tw:sg,src=!isNaN(tw)?'Indicado por tu profe':sg!=null?'Según tu semana anterior':'';
+      const tw=parseFloat(String(e.weight||'').replace(',','.')),rec=!isNaN(tw)?tw:sg,src=!isNaN(tw)?'Indicado por tu profe':sg!=null?(+w.from>0?'Lo que hiciste en la semana '+w.from:'Según tu semana anterior'):'';
       const nDone=Array.from({length:e.sets},(_,k)=>!!sets[k]).filter(Boolean).length,pr=isPR(s,S.week,e),msgs=l.msgs||[],newP=msgs.some(m=>m.from==='profe'&&!m.seenA),open=S.open['c-'+e.id];
       return `<article class="ex ${ok?'done':''}" id="ex-${e.id}">
         <div class="ex-top"><div class="thw">${thumb(e)}<span class="ex-n">${i+1}</span></div><div style="min-width:0;flex:1"><h3 class="ex-name">${esc(e.name)}</h3>
@@ -1483,7 +1496,8 @@ function planEditor(s,isTpl){
     <div class="weekbar">
       <div class="row" style="gap:12px"><h2 style="font-size:30px">Semana ${w.week}</h2>
         <select id="phase" aria-label="Fase de la semana">${Object.keys(PHASES).map(p=>`<option ${p===w.phase?'selected':''}>${p}</option>`).join('')}</select>
-        <span class="lbl">Volumen semanal ${vol} reps</span></div>
+        <span class="lbl">Volumen semanal ${vol} reps</span>
+        ${!isTpl&&S.week>0?`<select id="wfrom" class="timein" style="border-radius:999px;padding:6px 12px" aria-label="Peso sugerido"><option value="">Peso sugerido: semana anterior</option>${s.plan.slice(0,S.week).map(x=>`<option value="${x.week}" ${+w.from===x.week?'selected':''}>Peso sugerido: igual a semana ${x.week}</option>`).join('')}</select>`:''}</div>
       <div class="row" style="gap:6px"><button class="btn sm" id="copyNext">${ICON.copy}Copiar a semana ${w.week+1}</button><select id="ndays" class="timein" style="border-radius:999px;padding:6px 12px" aria-label="Días por semana">${[1,2,3,4,5,6,7].map(n=>`<option value="${n}" ${n===w.days.length?'selected':''}>${n} día${n>1?'s':''} por semana</option>`).join('')}</select><button class="btn sm" id="addDay">${ICON.plus}Día</button>${w.days.length>1?`<button class="btn sm warn" id="delDay">${ICON.x}Quitar día ${S.day+1}</button>`:''}</div>
     </div>
     <div class="daytabs">${w.days.map((dd,i)=>`<button class="dt ${i===S.day?'on':''}" data-d="${i}">Día ${i+1}${!isTpl&&dayDone(s,dd)?'<span class="ok">✓</span>':''}</button>`).join('')}</div>
@@ -1508,6 +1522,7 @@ function planEditor(s,isTpl){
   bindPeri(s);
   $$('.dt').forEach(b=>b.onclick=()=>{S.day=+b.dataset.d;render()});
   $('#phase').onchange=e=>{w.phase=e.target.value;save();render();toast('Fase actualizada')};
+  $('#wfrom')&&($('#wfrom').onchange=e=>{const v=+e.target.value;if(v)w.from=v;else delete w.from;save();render();toast(v?'Usa los pesos de la semana '+v:'Usa la semana anterior')});
   $('#ndays').onchange=e=>{const n=+e.target.value,lost=s.plan.reduce((a,ww)=>a+ww.days.slice(n).reduce((b,dd)=>b+dd.exercises.length,0),0);
     if(lost&&!confirm(`Se van a quitar los días ${n+1} en adelante de las 12 semanas (${lost} ejercicios). ¿Seguimos?`)){render();return}
     setDays(s.plan,n);S.day=Math.min(S.day,n-1);save();render();toast(n+' días por semana en todo el plan')};
