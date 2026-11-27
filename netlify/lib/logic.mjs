@@ -9,8 +9,10 @@ export function allowed(user, op) {
   if (op.k !== 's' && op.k !== 't' && op.k !== 'c') return false;
   if (op.k === 'c' && (op.id !== 'main' || op.op === 'remove')) return false;
   if (typeof op.id !== 'string' || !/^[A-Za-z0-9_-]{1,40}$/.test(op.id)) return false;
-  if (user.role === 'profe') {
-    // altas y bajas de alumnos van por su propio camino (crean/borran la cuenta)
+  if (user.role === 'profe' || user.role === 'gestora') {
+    // altas y bajas de alumnos van por su propio camino (crean/borran la cuenta);
+    // aceptar/rechazar Summer también (así queda registrado quién lo hizo)
+    if (op.k === 's' && ['set', 'del', 'push'].includes(op.op) && (!op.p.length || op.p[0] === 'summer')) return false;
     return !(op.k === 's' && (op.op === 'put' || op.op === 'remove'));
   }
   if (user.role === 'alumno') {
