@@ -1,10 +1,10 @@
-// Corre sola cada 10 minutos y manda el recordatorio de entrenamiento
+// Corre sola cada 30 minutos y manda el recordatorio de entrenamiento
 // a cada alumno a la hora y los días que eligió.
 import { listJSON, updateJSON } from '../lib/store.mjs';
 import { curWeek, todayIdx, localNow } from '../lib/logic.mjs';
 import { notify } from '../lib/push.mjs';
 
-export const config = { schedule: '*/10 * * * *' };
+export const config = { schedule: '*/30 * * * *' };
 
 export async function runReminders(now = new Date()) {
   const students = await listJSON('students/');
