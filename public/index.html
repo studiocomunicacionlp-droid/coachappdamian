@@ -653,11 +653,18 @@ function defaultTemplates(){return [
 let ME=null,NEEDS_SETUP=false;
 let db={students:[],templates:[],content:{id:'main',mind:[],rewards:[]}},snap=clone(db);
 async function API(path,opt={}){
-  const r=await fetch('/api/'+path,{method:opt.method||(opt.body?'POST':'GET'),headers:opt.body?{'content-type':'application/json'}:{},body:opt.body?JSON.stringify(opt.body):undefined,credentials:'same-origin',keepalive:!!opt.keepalive});
-  let j={};try{j=await r.json()}catch(e){}
-  if(r.status===401&&ME&&!['login','me','password'].includes(path)){loggedOut();throw Object.assign(new Error('Tu sesión terminó. Entrá de nuevo.'),{status:401})}
-  if(!r.ok)throw Object.assign(new Error(j.error||'No hay conexión'),{status:r.status});
-  return j;
+  const method=opt.method||(opt.body?'POST':'GET');
+  // las lecturas se reintentan solas si el servidor falla un instante
+  for(let i=0;;i++){
+    let r;
+    try{r=await fetch('/api/'+path,{method,headers:opt.body?{'content-type':'application/json'}:{},body:opt.body?JSON.stringify(opt.body):undefined,credentials:'same-origin',keepalive:!!opt.keepalive})}
+    catch(e){if(method==='GET'&&i<2){await new Promise(ok=>setTimeout(ok,800*(i+1)));continue}throw Object.assign(new Error('No hay conexión. Revisá internet y probá de nuevo.'),{status:0})}
+    if(r.status>=500&&method==='GET'&&i<2){await new Promise(ok=>setTimeout(ok,800*(i+1)));continue}
+    let j={};try{j=await r.json()}catch(e){}
+    if(r.status===401&&ME&&!['login','me','password'].includes(path)){loggedOut();throw Object.assign(new Error('Tu sesión terminó. Entrá de nuevo.'),{status:401})}
+    if(!r.ok)throw Object.assign(new Error(j.error||(r.status>=500?'El servidor tardó en responder. Esperá unos segundos y probá de nuevo.':'No hay conexión. Probá de nuevo.')),{status:r.status});
+    return j;
+  }
 }
 const isO=x=>x!==null&&typeof x==='object';
 const sameItem=(x,y)=>isO(x)&&isO(y)?(!Array.isArray(x)&&!Array.isArray(y)&&(x.id??null)===(y.id??null)):x===y;
@@ -683,9 +690,22 @@ function opsFor(A0,B0){
   return ops;
 }
 let syncT=null,syncing=false,again=false,offT=0;
-const pending=()=>syncing||opsFor(snap,db).length>0;
+// inflight: el último envío que todavía no confirmó el servidor. Si hay que reintentar,
+// se manda igual y con el mismo número (bid), así el servidor no lo guarda dos veces.
+let inflight=null;
+const pending=()=>syncing||!!inflight||opsFor(snap,db).length>0;
 const CK='gym-cache';
-function keep(){try{if(ME)localStorage.setItem(CK,JSON.stringify({me:ME,snap,db}))}catch(e){}}
+function keep(){try{if(ME)localStorage.setItem(CK,JSON.stringify({me:ME,snap,db,inflight}))}catch(e){}}
+const newBid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+async function sendOps(keepalive){
+  if(!inflight){const cur=clone(db),ops=opsFor(snap,cur);if(!ops.length)return true;inflight={bid:newBid(),ops,cur};keep()}
+  const b=inflight,body={ops:b.ops,bid:b.bid};
+  // el navegador no deja mandar más de 64 KB al cerrar la página
+  await API('ops',{body,keepalive:keepalive===true&&JSON.stringify(body).length<60000});
+  if(inflight===b){snap=b.cur;inflight=null}
+  keep();
+  return !opsFor(snap,db).length;
+}
 function cached(){try{return JSON.parse(localStorage.getItem(CK)||'null')}catch(e){return null}}
 const save=()=>{keep();clearTimeout(syncT);syncT=setTimeout(flush,350)};
 addEventListener('online',()=>{flush();refresh()});
@@ -693,13 +713,12 @@ async function flush(keepalive){
   clearTimeout(syncT);
   if(!ME)return;
   if(syncing){again=true;return}
-  const cur=clone(db),ops=opsFor(snap,cur);
-  if(!ops.length)return;
+  if(!inflight&&!opsFor(snap,db).length)return;
   syncing=true;
-  try{await API('ops',{body:{ops},keepalive:keepalive===true});snap=cur;offT=0;keep()}
+  try{if(!await sendOps(keepalive))again=true;offT=0}
   catch(e){
     if(e.status===401)return;
-    if(e.status>=400&&e.status<500&&e.status!==429){toast(e.message);syncing=false;await refresh(true);return}
+    if(e.status>=400&&e.status<500&&e.status!==429){inflight=null;keep();toast(e.message);syncing=false;await refresh(true);return}
     if(!offT||Date.now()-offT>20000){toast('Sin conexión. Se guarda cuando vuelva.');offT=Date.now()}
     syncT=setTimeout(flush,4000);
   }
@@ -719,7 +738,7 @@ async function refresh(force){
 setInterval(()=>{document.visibilityState==='visible'&&refresh()},30000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();else flush(true)});
 addEventListener('pagehide',()=>flush(true));
-function loggedOut(){try{localStorage.removeItem(CK)}catch(e){}ME=null;db=normData({});snap=clone(db);NAV.length=0;stopRest();S={...S,role:null,sid:null,view:'home',week:0,day:0,tab:'plan',stab:'rutina',ttab:'alumnos',open:{}};try{history.replaceState(null,'',location.pathname)}catch(e){}render()}
+function loggedOut(){try{localStorage.removeItem(CK)}catch(e){}ME=null;inflight=null;db=normData({});snap=clone(db);NAV.length=0;stopRest();S={...S,role:null,sid:null,view:'home',week:0,day:0,tab:'plan',stab:'rutina',ttab:'alumnos',open:{}};try{history.replaceState(null,'',location.pathname)}catch(e){}render()}
 /* ===== cargas hechas a pedido (se aplican una sola vez, desde el panel del profe) ===== */
 const P1='Principal: subí el peso cuando completes todas las series con el máximo de reps. Si no llegás, mantené el peso.';
 const ACC='Accesorio: no hace falta subir el peso. Priorizá técnica, buena ejecución y conexión mente-músculo.';
@@ -777,8 +796,15 @@ function enter(user){
 }
 async function loadData(){
   const c=cached();
-  if(c&&ME&&c.me?.email===ME.email){const ops=opsFor(normData(c.snap),normData(c.db));if(ops.length){try{await API('ops',{body:{ops}})}catch(e){if(e.status===401)throw e}}}
-  const d=normData(await API('data'));db=d;snap=clone(d);keep()}
+  // si quedaron cambios sin guardar de la vez anterior, se mandan primero
+  if(c&&ME&&c.me?.email===ME.email){
+    snap=normData(c.snap);db=normData(c.db);inflight=c.inflight||null;
+    for(let i=0;i<3;i++){
+      try{if(await sendOps())break}
+      catch(e){if(e.status>=400&&e.status<500&&e.status!==401&&e.status!==429){inflight=null;break}throw e}
+    }
+  }
+  const d=normData(await API('data'));db=d;snap=clone(d);inflight=null;keep()}
 let S={role:null,sid:null,view:'home',week:0,day:0,tab:'plan',stab:'rutina',ttab:'alumnos',tid:null,fx:null,open:{}};
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1677,9 +1703,9 @@ function tplEdit(){
 async function boot(){
   $('#app').innerHTML='<p class="mute" style="padding:40px 0">Cargando…</p>';
   const c=cached();
-  if(!navigator.onLine&&c){ME=c.me;db=normData(c.db);snap=normData(c.snap);enter(ME);try{if(location.hash.length>1)applyHash(location.hash.slice(1))}catch(e){}render();toast('Sin conexión: lo que anotes se guarda cuando vuelva internet');return}
+  if(!navigator.onLine&&c){ME=c.me;db=normData(c.db);snap=normData(c.snap);inflight=c.inflight||null;enter(ME);try{if(location.hash.length>1)applyHash(location.hash.slice(1))}catch(e){}render();toast('Sin conexión: lo que anotes se guarda cuando vuelva internet');return}
   try{const r=await API('me');ME=r.user;NEEDS_SETUP=r.needsSetup;if(ME){await loadData();enter(ME)}}
-  catch(e){if(e.status!==401&&c){ME=c.me;db=normData(c.db);snap=normData(c.snap);enter(ME);try{if(location.hash.length>1)applyHash(location.hash.slice(1))}catch(x){}render();toast('Sin conexión: lo que anotes se guarda cuando vuelva internet');return}if(e.status===401)return;$('#app').innerHTML=`<div class="stack" style="padding:40px 0"><h1>Sin conexión</h1><p class="mute">No pudimos conectar con la app. Revisá internet y probá de nuevo.</p><button class="btn y" onclick="location.reload()" style="align-self:flex-start">Reintentar</button></div>`;return}
+  catch(e){const c=cached();if(e.status!==401&&c){ME=c.me;db=normData(c.db);snap=normData(c.snap);inflight=c.inflight||null;syncT=setTimeout(flush,4000);enter(ME);try{if(location.hash.length>1)applyHash(location.hash.slice(1))}catch(x){}render();toast('Sin conexión: lo que anotes se guarda cuando vuelva internet');return}if(e.status===401)return;$('#app').innerHTML=`<div class="stack" style="padding:40px 0"><h1>Sin conexión</h1><p class="mute">No pudimos conectar con la app. Revisá internet y probá de nuevo.</p><button class="btn y" onclick="location.reload()" style="align-self:flex-start">Reintentar</button></div>`;return}
   try{if(location.hash.length>1)applyHash(location.hash.slice(1))}catch(e){}
   render();
   if(ME)initPush();

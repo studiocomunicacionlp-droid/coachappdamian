@@ -33,7 +33,7 @@ export async function notify(email, payload) {
   const dead = [];
   await Promise.all(rec.subs.map(async (sub) => {
     try {
-      await webpush.sendNotification(sub, JSON.stringify(payload), { TTL: 6 * 3600 });
+      await webpush.sendNotification(sub, JSON.stringify(payload), { TTL: 6 * 3600, timeout: 5000 });
       ok++;
     } catch (e) {
       if (e.statusCode === 404 || e.statusCode === 410) dead.push(sub.endpoint);

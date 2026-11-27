@@ -30,15 +30,43 @@ export const setJSON = (key, v) => retry(() => store().setJSON(key, v));
 export const del = (key) => retry(() => store().delete(key));
 
 export async function listKeys(prefix) {
+  return (await listEntries(prefix)).map((b) => b.key);
+}
+const listEntries = (prefix) => retry(async () => {
   const out = [];
-  for await (const page of store().list({ prefix, paginate: true })) out.push(...page.blobs.map((b) => b.key));
+  for await (const page of store().list({ prefix, paginate: true })) out.push(...page.blobs);
+  return out;
+});
+
+// Copia en memoria de cada documento según su versión (etag): mientras la función
+// sigue "despierta", no vuelve a bajar los que no cambiaron. Así abrir el panel
+// con muchos alumnos es rápido y no se corta por tiempo.
+const cache = new Map();
+async function getCached(key, etag) {
+  const c = cache.get(key);
+  if (etag && c && c.etag === etag) return c.data;
+  const r = await retry(() => store().getWithMetadata(key, { type: 'json' }));
+  if (!r) { cache.delete(key); return null; }
+  // se guarda con la versión que dio la lista: si cambió en el medio, la próxima vez se vuelve a leer
+  if (etag) cache.set(key, { etag, data: r.data });
+  return r.data;
+}
+
+// Hace las lecturas de a poco (no todas juntas) para no saturar el almacenamiento.
+async function mapLimit(list, n, fn) {
+  const out = new Array(list.length);
+  let i = 0;
+  await Promise.all(Array.from({ length: Math.min(n, list.length) }, async () => {
+    while (i < list.length) { const j = i++; out[j] = await fn(list[j]); }
+  }));
   return out;
 }
 
 export async function listJSON(prefix) {
-  const keys = await listKeys(prefix);
-  const vals = await Promise.all(keys.map((k) => getJSON(k)));
-  return vals.filter(Boolean);
+  const entries = await listEntries(prefix);
+  const vals = await mapLimit(entries, 8, (b) => getCached(b.key, b.etag));
+  // devuelve copias, para que nadie modifique la copia guardada en memoria
+  return vals.filter(Boolean).map((v) => structuredClone(v));
 }
 
 // Lee, modifica y guarda un documento sin pisar cambios que lleguen al mismo tiempo.

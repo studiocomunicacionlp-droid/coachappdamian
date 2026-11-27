@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import zlib from 'node:zlib';
 import { getJSON, setJSON, del, store, listJSON, listKeys, updateJSON, secrets, retry } from '../lib/store.mjs';
 import { normEmail, userKey, hashPassword, checkPassword, accessCode, sessionCookie, clearCookie, currentUser } from '../lib/auth.mjs';
 import { allowed, applyOp, exName } from '../lib/logic.mjs';
@@ -13,6 +14,16 @@ const ID = /^[A-Za-z0-9_-]{1,40}$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const publicUser = (u) => u && { email: u.email, name: u.name || '', role: u.role, sid: u.sid || null };
+
+// Respuestas grandes (muchos alumnos) se mandan comprimidas, así no pasan el límite de tamaño de Netlify.
+function bigJSON(req, data) {
+  const txt = JSON.stringify(data);
+  if (txt.length < 2e6 || !/\bgzip\b/.test(req.headers.get('accept-encoding') || '')) return json(data);
+  return new Response(zlib.gzipSync(txt), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'content-encoding': 'gzip', vary: 'accept-encoding' } });
+}
+// Marca interna para no aplicar dos veces el mismo envío (ver "ops"); no se manda a la app.
+const clean = (d) => { if (d && d._b) delete d._b; return d; };
+const BID = /^[A-Za-z0-9_-]{6,40}$/;
 
 async function body(req) {
   try { return await req.json(); } catch { return {}; }
@@ -66,14 +77,17 @@ export default async (req, context) => {
         const [students, templates, content] = await Promise.all([listJSON('students/'), listJSON('templates/'), getJSON('content/main')]);
         students.sort((a, b) => (a.created || 0) - (b.created || 0));
         templates.sort((a, b) => (a.created || 0) - (b.created || 0));
-        return json({ students, templates, content });
+        return bigJSON(req, { students: students.map(clean), templates: templates.map(clean), content: clean(content) });
       }
       const [s, content] = await Promise.all([getJSON('students/' + user.sid), getJSON('content/main')]);
-      return json({ students: s ? [s] : [], templates: [], content });
+      return json({ students: s ? [clean(s)] : [], templates: [], content: clean(content) });
     }
 
     if (path === 'ops' && M === 'POST') {
-      const { ops } = await body(req);
+      const { ops, bid: rawBid } = await body(req);
+      // cada envío trae un número propio: si la app lo reintenta (porque no le llegó la respuesta),
+      // el servidor reconoce que ya lo guardó y no duplica comentarios, entrenamientos, etc.
+      const bid = BID.test(rawBid || '') ? rawBid : null;
       if (!Array.isArray(ops) || ops.length > 2000) return fail('Pedido inválido');
       for (const op of ops) if (!allowed(user, op)) return fail('No tenés permiso para ese cambio', 403);
       const groups = new Map();
@@ -87,6 +101,8 @@ export default async (req, context) => {
         const isStudent = key.startsWith('students/');
         let before = null, after = null, emailMove = null;
         const res = await updateJSON(key, (doc) => {
+          before = after = null;
+          if (bid && doc?._b?.includes(bid)) return undefined; // ya se había guardado
           before = doc ? JSON.parse(JSON.stringify(doc)) : null;
           let d = doc ? JSON.parse(JSON.stringify(doc)) : key === 'content/main' ? { id: 'main' } : null;
           for (const op of list) {
@@ -96,13 +112,16 @@ export default async (req, context) => {
           }
           if (!d) return undefined;
           if (!d.created) d.created = before?.created || Date.now();
+          if (bid) d._b = [...(before?._b || []), bid].slice(-30);
           after = d;
           return d;
         }, { create: key === 'content/main' || (!isStudent && list.some((o) => o.op === 'put')) });
         if (!res && isStudent) return fail('Ese alumno ya no existe', 404);
         if (isStudent && before && after) {
           if (normEmail(before.email) !== normEmail(after.email)) emailMove = [before.email, after.email];
-          await sideEffects(before, after);
+          // los avisos se mandan aparte, sin hacer esperar el guardado
+          const job = sideEffects(before, after).catch((e) => console.error('avisos', e));
+          if (context?.waitUntil) context.waitUntil(job); else await job;
         }
         if (emailMove) {
           const err = await moveEmail(emailMove[0], emailMove[1], after.id);
