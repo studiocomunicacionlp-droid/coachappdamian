@@ -926,6 +926,7 @@ function login(){
       <p>Tu profesor arma tu rutina semana por semana. Vos la seguís desde el celular, anotás tus pesos, marcás cada serie y le escribís cuando lo necesites.</p>
     </div>
     <form class="drawer stack" id="lf" style="border-color:var(--line)" novalidate>
+      ${setup?'':'<button class="btn y" type="button" id="lf-summer" style="justify-content:center;padding:16px 18px;font-size:17px">☀ Summer Training: inscribite acá</button><p class="mute" style="margin:0;font-size:13px;text-align:center">¿Ya tenés cuenta? Entrá acá abajo.</p>'}
       <h2 style="font-size:34px">${setup?'Crear cuenta del profe':'Entrar'}</h2>
       ${setup?`<p class="mute" style="margin:0;font-size:14px">Es la primera vez que se abre la app. Creá la cuenta del entrenador: con ella vas a cargar alumnos y rutinas.</p>
       <div class="field"><label for="lf-name">Tu nombre</label><input id="lf-name" autocomplete="name" placeholder="Nombre del profe"></div>`:''}
@@ -934,7 +935,6 @@ function login(){
       <button class="btn y" id="lf-go" type="submit" style="justify-content:center">${setup?'Crear cuenta y entrar':'Entrar'} →</button>
       <p class="mute" id="lf-err" style="margin:0;font-size:14px;color:var(--hot)" hidden></p>
       ${setup?'':'<p class="note" style="margin:0">¿Sos alumno? Entrá con tu email y el código que te pasó tu profe. Si lo perdiste, pedile uno nuevo.</p>'}
-      ${setup?'':'<button class="btn" type="button" id="lf-summer" style="justify-content:center">☀ Summer Training: inscribite acá</button>'}
     </form></section>`;
   $('#lf-summer')&&($('#lf-summer').onclick=async()=>{S.reg=true;try{S.sumOpen=(await API('summer/info')).open}catch(e){}render();scrollTo(0,0)});
   $('#lf').onsubmit=async ev=>{
