@@ -607,6 +607,8 @@ a.btn{text-decoration:none;color:inherit}a.btn.y{color:var(--ink)}
 .pday{background:var(--s1);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
 .pex{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding-top:10px;border-top:1px solid var(--line)}
 .pex b{display:block}.pex .rx{font-family:var(--mono);font-size:12px;color:var(--y)}.pex .nt{font-size:13px;color:var(--mute)}
+.pbar{height:8px;border-radius:99px;background:var(--s2);overflow:hidden}.pbar i{display:block;height:100%;background:var(--y);border-radius:99px}
+.lockbig{font-size:40px}.prize-ok{border:1px solid var(--y)}
 .sumlog{margin:0;padding-left:18px;font-size:13px;color:var(--mute);display:flex;flex-direction:column;gap:4px}
 @media (max-width:520px){.choice.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.ch .big{font-size:32px}.ch{padding:10px}}
 </style>
@@ -956,8 +958,8 @@ function student(){
   if(S.week<0||S.week>=s.plan.length)S.week=curWeek(s);
   if(S.stab==='prog')return studentProg(s);
   if(S.stab==='med')return studentMed(s);
-  if(S.stab==='comida')return studentFood(s);
-  if(S.stab==='mente')return studentMind(s);
+  if(S.stab==='comida')return spLocked(s,'comida')?lockedView(s,spFor('comida')):studentFood(s);
+  if(S.stab==='mente')return spLocked(s,'mente')?lockedView(s,spFor('mente')):studentMind(s);
   if(S.stab==='premios')return studentRewards(s);
   S.view==='day'?studentDay():studentHome();
 }
@@ -1230,7 +1232,7 @@ function tick(){$('#rest-t').textContent=Math.floor(R.left/60)+':'+pad(R.left%60
 $('#rest-skip').onclick=stopRest;
 $$('[data-r]').forEach(b=>b.onclick=()=>{R.dur=+b.dataset.r;startRest()});
 function secNav(){const s=stu(),nm=s?mindNew(s):0,nw=s?CT().rewards.filter(r=>{const x=rStat(s,r);return x.won&&!x.given}).length:0;
-  return `<div class="seg full six" role="tablist" aria-label="Secciones">${[['rutina','Rutina'],['comida','Comida'],['mente','Mentalidad',nm],['premios','Premios',nw],['prog','Progreso'],['med','Medidas']].map(([k,n,d])=>`<button data-sec="${k}" class="${S.stab===k?'on':''}" role="tab" aria-selected="${S.stab===k}">${n}${d?'<i class="ndot"></i>':''}</button>`).join('')}</div>`}
+  return `<div class="seg full six" role="tablist" aria-label="Secciones">${[['rutina','Rutina'],['comida','Comida'],['mente','Mentalidad',nm],['premios','Premios',nw],['prog','Progreso'],['med','Medidas']].map(([k,n,d])=>{const lk=s&&spLocked(s,k);return `<button data-sec="${k}" class="${S.stab===k?'on':''}" role="tab" aria-selected="${S.stab===k}">${lk?'🔒 ':''}${n}${d&&!lk?'<i class="ndot"></i>':''}</button>`}).join('')}</div>`}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-sec]');if(!b)return;S.stab=b.dataset.sec;S.view='home';stopRest();render();scrollTo(0,0)});
 function goBack(fallback){if(NAV.length>1){history.back()}else{fallback();render();scrollTo(0,0)}}
 function backBar(label){return `<div class="row sp"><button class="btn sm ghost" id="back">${ICON.back}${label}</button></div>`}
@@ -1309,7 +1311,7 @@ function bindMind(profe){
   $$('[data-mdx]').forEach(b=>b.onclick=()=>{if(!confirm('¿Borrar este contenido?'))return;CT().mind=CT().mind.filter(m=>m.id!==b.dataset.mdx);save();render();toast('Borrado')});
 }
 function studentMind(s){
-  $('#app').innerHTML=`<div class="stack" style="gap:22px">${backBar('Rutina')}${secNav()}${mindHTML(false)}</div>`;
+  $('#app').innerHTML=`<div class="stack" style="gap:22px">${backBar('Rutina')}${secNav()}${isSummer(s)?guideCard(s,spFor('mente')):''}${mindHTML(false)}</div>`;
   $('#back').onclick=()=>goBack(()=>{S.stab='rutina';S.view='home'});
   bindMind(false);
   const last=CT().mind.map(m=>m.date||'').sort().at(-1);
@@ -1329,7 +1331,7 @@ function foodView(s){
 }
 function studentFood(s){
   $('#app').innerHTML=`<div class="stack" style="gap:22px">${backBar('Rutina')}${secNav()}
-    <div class="stack" style="gap:8px"><span class="lbl y">Tu plan</span><h1>Alimentación</h1></div>${foodView(s)}</div>`;
+    <div class="stack" style="gap:8px"><span class="lbl y">Tu plan</span><h1>Alimentación</h1></div>${isSummer(s)?guideCard(s,spFor('comida')):''}${isSummer(s)&&!(s.food?.meals?.length||s.food?.notes||s.food?.link)?'':foodView(s)}</div>`;
   $('#back').onclick=()=>goBack(()=>{S.stab='rutina';S.view='home'});
 }
 function tabFood(s){
@@ -1402,8 +1404,9 @@ function bindRewardMarks(s){
 function studentRewards(s){
   const rs=CT().rewards;
   $('#app').innerHTML=`<div class="stack" style="gap:22px">${backBar('Rutina')}${secNav()}
-    <div class="stack" style="gap:8px"><span class="lbl y">Desafíos de tu profe</span><h1>Premios</h1></div>
-    ${rs.length?`<div class="stack" style="gap:10px">${rs.map(r=>rewardCard(s,r,'alumno')).join('')}</div>`:'<p class="mute" style="margin:0">Tu profe todavía no cargó premios. Cuando lo haga, acá ves cuánto te falta para ganarlos.</p>'}</div>`;
+    <div class="stack" style="gap:8px"><span class="lbl y">${isSummer(s)?'Summer Training':'Desafíos de tu profe'}</span><h1>Premios</h1></div>
+    ${isSummer(s)?`<div class="stack" style="gap:10px">${SPRIZES.map(pz=>prizeCard(s,pz)).join('')}</div>${rs.length?'<h2 class="sec-t">Desafíos de tu profe</h2>':''}`:''}
+    ${isSummer(s)&&!rs.length?'':rs.length?`<div class="stack" style="gap:10px">${rs.map(r=>rewardCard(s,r,'alumno')).join('')}</div>`:'<p class="mute" style="margin:0">Tu profe todavía no cargó premios. Cuando lo haga, acá ves cuánto te falta para ganarlos.</p>'}</div>`;
   $('#back').onclick=()=>goBack(()=>{S.stab='rutina';S.view='home'});
 }
 function rewardsAdmin(){
@@ -1862,6 +1865,36 @@ function summerRegister(){
 /* --- panel del profe / gestora: pestaña Summer --- */
 const SUMVIEW=()=>`<div class="seg" role="tablist" aria-label="Summer">${[['ins','Inscriptos'],['prog','Programas']].map(([k,n])=>`<button data-sv="${k}" class="${(S.sview||'ins')===k?'on':''}">${n}</button>`).join('')}</div>`;
 function bindSumView(){$$('[data-sv]').forEach(b=>b.onclick=()=>{S.sview=b.dataset.sv;render()})}
+/* --- premios de Summer: Comida y Mentalidad se desbloquean cumpliendo el plan --- */
+const SPRIZES=[
+  {id:'food',weeks:4,tab:'comida',label:'Comida',title:'Guía de alimentación',sub:'Según tu objetivo',goal:'1 mes cumpliendo tu plan'},
+  {id:'habits',weeks:8,tab:'mente',label:'Mentalidad',title:'Guía de hábitos en 21 días',sub:'Cómo incorporar hábitos que se sostienen',goal:'2 meses cumpliendo tu plan'},
+  {id:'sustain',weeks:12,tab:null,label:'Premios',title:'Guía: cómo sostener tu entrenamiento y volverlo parte de tu vida',sub:'Para seguir después de las 12 semanas',goal:'3 meses cumpliendo tu plan'}];
+const SP_MIN=.8; // "cumplir" = hacer al menos el 80% de los entrenamientos de esas semanas
+function spStat(s,pz){let a=0,b=0;(s.plan||[]).slice(0,pz.weeks).forEach(w=>w.days.forEach(d=>{if(!d.exercises.length)return;a++;if(dayDone(s,d))b++}));
+  const need=Math.ceil(a*SP_MIN);return {done:b,need,won:a>0&&b>=need,pct:need?Math.min(1,b/need):0}}
+const spFor=tab=>tab&&SPRIZES.find(p=>p.tab===tab);
+const spLocked=(s,tab)=>{const pz=isSummer(s)&&spFor(tab);return !!pz&&!spStat(s,pz).won};
+const GUIDE=()=>({...(SUMMER().guides||{})});
+function guideLink(s,pz){const g=GUIDE();return pz.id==='food'?g['food_'+(s.summer?.config?.goal||'recomp')]:g[pz.id]}
+function guideCard(s,pz){const url=guideLink(s,pz);
+  return `<div class="card stack prize-ok" style="gap:10px"><span class="lbl y">🏆 Premio ganado · ${esc(pz.goal)}</span><h2 style="font-size:30px;margin:0">${esc(pz.title)}</h2>
+    <p class="mute" style="margin:0">${pz.id==='food'?esc(SGOAL[s.summer?.config?.goal]?.[0]||'Tu objetivo'):esc(pz.sub)}</p>
+    ${url?`<a class="btn y" href="${esc(url)}" target="_blank" rel="noopener" style="align-self:flex-start">Abrir la guía →</a>`:'<p class="note" style="margin:0;color:var(--fg)">Tu guía está casi lista: apenas esté, aparece acá.</p>'}</div>`}
+function prizeCard(s,pz){const x=spStat(s,pz);
+  return `<div class="card stack" style="gap:10px"><div class="row sp"><strong>${x.won?'🏆':'🔒'} ${esc(pz.title)}</strong><span class="pill ${x.won?'y':'ghost'}">${x.won?'Ganado':esc(pz.goal)}</span></div>
+    ${x.won&&!pz.tab?(guideLink(s,pz)?`<a class="btn y sm" href="${esc(guideLink(s,pz))}" target="_blank" rel="noopener" style="align-self:flex-start">Abrir la guía →</a>`:'<span class="mute" style="font-size:13px">Tu guía está casi lista: apenas esté, aparece acá.</span>'):''}
+    <span class="mute" style="font-size:13px">${x.won?(pz.tab?`Ya está en ${esc(pz.label)}.`:'¡Felicitaciones por completar Summer Training!'):`${pz.tab?`Se desbloquea ${esc(pz.label)}. `:''}Llevás ${x.done} de ${x.need} entrenamientos de las semanas 1 a ${pz.weeks}.`}</span>
+    <div class="pbar"><i style="width:${Math.round(x.pct*100)}%"></i></div></div>`}
+function lockedView(s,pz){const x=spStat(s,pz);
+  $('#app').innerHTML=`<div class="stack" style="gap:22px">${backBar('Rutina')}${secNav()}
+    <div class="card stack" style="gap:14px;align-items:flex-start"><span class="lockbig">🔒</span><span class="lbl y">Premio de Summer Training</span>
+      <h1 style="font-size:clamp(34px,8vw,52px)">${esc(pz.label)} se desbloquea con ${esc(pz.goal)}</h1>
+      <p class="mute" style="margin:0">Cuando completes al menos ${x.need} entrenamientos de las semanas 1 a ${pz.weeks}, ganás la <b style="color:var(--fg)">${esc(pz.title)}</b>${pz.id==='food'?' según tu objetivo':''}.</p>
+      <div class="pbar" style="width:100%"><i style="width:${Math.round(x.pct*100)}%"></i></div>
+      <span class="mute" style="font-size:13px">Llevás ${x.done} de ${x.need}. ¡Seguí así!</span></div></div>`;
+  $('#back').onclick=()=>goBack(()=>{S.stab='rutina';S.view='home'});
+}
 // biblioteca: ver cada programa (hombre/mujer, días, objetivo, nivel) con sus 12 semanas
 function summerPrograms(){
   const c=S.pcfg||(S.pcfg={sex:'F',days:4,goal:'recomp',level:'inter',prio:'pecho'}),wk=S.pwk||0;
@@ -1921,6 +1954,8 @@ function summerAdmin(){
     <section class="card stack" style="gap:14px"><h3>Inscripción</h3>
       <label class="row" style="gap:10px;cursor:pointer"><input type="checkbox" id="sum-open" ${cfg.open?'checked':''} style="width:22px;height:22px;accent-color:var(--y)"><span><b>Inscripción abierta</b><br><span class="mute" style="font-size:13px">Si la cerrás, nadie nuevo se puede anotar.</span></span></label>
       <div class="field" style="max-width:200px"><label for="sum-cupos">Cupos</label><input id="sum-cupos" inputmode="numeric" value="${cfg.cupos}"></div>
+      <div class="stack" style="gap:10px"><b>Guías de los premios</b><span class="mute" style="font-size:13px">Pegá el link de cada guía (por ejemplo de Google Drive, con acceso “cualquiera con el link”). Se desbloquean solas: alimentación con 1 mes cumpliendo el plan (80% de los entrenamientos de las semanas 1 a 4) hábitos con 2 meses (semanas 1 a 8) y cómo sostener el entrenamiento con 3 meses (semanas 1 a 12).</span>
+        ${[['food_recomp','Alimentación · Recomposición corporal'],['food_dev','Alimentación · Desarrollo muscular'],['habits','Hábitos en 21 días'],['sustain','Cómo sostener tu entrenamiento (3er mes)']].map(([k,t])=>`<div class="field"><label for="g-${k}">${t}</label><input id="g-${k}" data-guide="${k}" placeholder="https://…" value="${esc(GUIDE()[k]||'')}"></div>`).join('')}</div>
       <div class="field"><label>Link para que se inscriban (para la bio o las historias)</label><div class="row" style="gap:8px"><input readonly value="${esc(link)}" style="flex:1;min-width:0"><button class="btn sm" id="sum-copy">${ICON.copy}Copiar</button></div></div></section>
   </div>`;
   bindSeg();bindSumView();
@@ -1930,6 +1965,7 @@ function summerAdmin(){
   $$('[data-sum]').forEach(b=>b.onclick=()=>{S.sid=b.dataset.sum;const s=stu();Object.assign(S,{view:'student',week:s.plan?.length?curWeek(s):0,day:0,tab:s.plan?.length?'prog':'data'});render();scrollTo(0,0)});
   $('#sum-open').onchange=e=>{CT().summer={...SUMMER(),open:e.target.checked};save();toast(e.target.checked?'Inscripción abierta':'Inscripción cerrada')};
   $('#sum-cupos').onchange=e=>{const n=parseInt(e.target.value,10);if(n>0){CT().summer={...SUMMER(),cupos:n};save();render();toast('Cupos guardados')}};
+  $$('[data-guide]').forEach(i=>i.onchange=()=>{const v=i.value.trim();if(v&&!/^https?:\/\//.test(v)){toast('El link tiene que empezar con https://');return}CT().summer={...SUMMER(),guides:{...GUIDE(),[i.dataset.guide]:v}};save();toast('Guía guardada')});
   $('#sum-copy').onclick=async()=>{try{await navigator.clipboard.writeText(link);toast('Link copiado')}catch(e){toast('No se pudo copiar')}};
 }
 // en la ficha (Datos) de un inscripto: quién lo aceptó y cambiar su programa

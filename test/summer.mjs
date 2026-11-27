@@ -96,6 +96,26 @@ try {
   await shot(A, 's7-dia');
   step('entrena el día 1');
 
+  // ---- premios de Summer: Comida bloqueada hasta cumplir el primer mes ----
+  await A.evaluate(() => { location.hash = 'comida'; });
+  await A.getByText(/Comida se desbloquea con 1 mes/).waitFor();
+  await shot(A, 's7b-comida-bloqueada');
+  assert.equal((await api(P, 'ops', { ops: [{ k: 'c', id: 'main', op: 'set', p: ['summer'], v: { open: true, cupos: 20, guides: { food_dev: 'https://example.com/guia-dev' } } }] })).status, 200);
+  const mine = (await api(A, 'data')).body.students[0];
+  const ops = [];
+  mine.plan.slice(0, 4).forEach((w) => w.days.forEach((d) => d.exercises.forEach((e) => ops.push({ k: 's', id: mine.id, op: 'set', p: ['logs', e.id], v: { sets: Array(e.sets).fill(true) } }))));
+  assert.equal((await api(A, 'ops', { ops })).status, 200);
+  await A.reload();
+  await A.click('[data-sec="comida"]');
+  await A.getByText('Premio ganado · 1 mes cumpliendo tu plan').waitFor();
+  assert.equal(await A.locator('a[href="https://example.com/guia-dev"]').count(), 1);
+  await A.click('[data-sec="mente"]');
+  await A.getByText(/Mentalidad se desbloquea con 2 meses/).waitFor();
+  await A.click('[data-sec="premios"]');
+  await A.getByText('Guía: cómo sostener tu entrenamiento y volverlo parte de tu vida').waitFor();
+  await shot(A, 's7c-premios');
+  step('Comida se desbloquea al cumplir el primer mes; Mentalidad y el 3er premio siguen bloqueados');
+
   // ---- el profe ve todo separado y quién aceptó ----
   await P.reload();
   await P.getByText('Alumnos 0').waitFor();
