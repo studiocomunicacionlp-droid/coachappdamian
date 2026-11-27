@@ -215,6 +215,16 @@ try {
   await shot(P, '14-profe-entregado');
   step('profe ve el aviso del premio y lo marca entregado');
 
+  // ---- si se pierde la respuesta del servidor, el reintento no duplica ----
+  let lost = 0;
+  await A.route('**/api/ops', async (route) => { await route.fetch(); lost++; await route.abort('failed'); }, { times: 1 });
+  await A.evaluate(() => { const s = db.students[0]; s.history.push({ ...s.history[s.history.length - 1], date: '2099-01-01' }); save(); });
+  await A.waitForTimeout(6000);
+  const dup = await A.evaluate(async () => (await (await fetch('/api/data')).json()).students[0].history.filter((h) => h.date === '2099-01-01').length);
+  assert.equal(lost, 1);
+  assert.equal(dup, 1);
+  step('si se corta la respuesta, el reintento no duplica');
+
   // ---- código nuevo invalida el anterior ----
   await P.goto(app.url + '/#alumno-' + final.id + '-data');
   await P.click('#d-code');
