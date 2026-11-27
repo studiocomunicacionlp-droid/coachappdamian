@@ -7,7 +7,7 @@ App para un entrenador personal y sus alumnos. Negro y amarillo, instalable en e
 - **Summer Training:** programa de 12 semanas para gente nueva, separado de los alumnos de siempre. La persona toca “Summer Training” en la pantalla de entrada (o entra por el link `/#summer`), se inscribe con su mail y una contraseña y queda pendiente. El profe o la gestora la aceptan en la pestaña **Summer** (queda registrado quién la aceptó y cuándo). Ya aceptada, elige programa (femenino/masculino), días (3, 4 o 5), objetivo y nivel, y la app arma sus 12 semanas. Desde ahí se cierra la inscripción y se fijan los cupos.
 - **Alumno (solo lectura de la rutina):** marca series, anota el peso, escribe al profe, marca el esfuerzo (RPE), carga medidas y fotos, ve su progreso y récords (medalla al completar la última serie con peso récord), recibe recordatorios, ve su plan de alimentación, el contenido de mentalidad y cuánto le falta para cada premio.
 
-Todo corre en **Netlify**: la página, las funciones (`/api/*`), los datos (Netlify Blobs), el login (email + contraseña o código) y las notificaciones (web push con una función programada cada 10 minutos). No hace falta ninguna otra cuenta ni configurar variables: las claves internas se generan solas la primera vez.
+Todo corre en **Netlify**: la página, las funciones (`/api/*`), los datos (Netlify Blobs), el login (email + contraseña o código) y las notificaciones (web push con una función programada cada 2 horas). No hace falta ninguna otra cuenta ni configurar variables: las claves internas se generan solas la primera vez.
 
 ## Publicar en Netlify
 

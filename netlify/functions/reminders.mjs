@@ -1,10 +1,10 @@
-// Corre sola cada 10 minutos y manda el recordatorio de entrenamiento
+// Corre sola cada 2 horas y manda el recordatorio de entrenamiento
 // a cada alumno a la hora y los días que eligió.
 import { listJSON, updateJSON } from '../lib/store.mjs';
 import { curWeek, todayIdx, localNow } from '../lib/logic.mjs';
 import { notify } from '../lib/push.mjs';
 
-export const config = { schedule: '*/10 * * * *' };
+export const config = { schedule: '0 */2 * * *' };
 
 export async function runReminders(now = new Date()) {
   const students = await listJSON('students/');
@@ -23,8 +23,8 @@ async function remindOne(s, now) {
   if (!r.days.includes(t.weekday)) return 0;
   const [hh, mm] = String(r.time).split(':').map(Number);
   const at = hh * 60 + (mm || 0);
-  // dentro de la hora siguiente a la elegida, y una sola vez por día
-  if (t.minutes < at || t.minutes > at + 60) return 0;
+  // dentro de las 2 horas siguientes a la elegida (la función corre cada 2 h), y una sola vez por día
+  if (t.minutes < at || t.minutes >= at + 120) return 0;
   if (r.lastSent === t.date) return 0;
   if ((s.history || []).some((h) => h.date === t.date)) return 0; // ya entrenó hoy
   const cw = curWeek(s), ti = todayIdx(s, cw);
