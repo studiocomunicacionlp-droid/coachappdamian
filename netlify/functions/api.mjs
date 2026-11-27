@@ -238,8 +238,10 @@ export default async (req, context) => {
 
     return fail('No encontrado', 404);
   } catch (e) {
-    console.error(e);
-    return fail(e.message === 'conflict' ? 'Hubo un cruce de cambios, probá de nuevo' : 'No se pudo guardar por un problema momentáneo. Esperá unos segundos y probá de nuevo.', 500);
+    console.error(path, e);
+    // el detalle técnico al final ayuda a encontrar el problema si alguien manda captura
+    const det = String(e?.code || e?.status || e?.name || 'error') + ': ' + String(e?.message || e).slice(0, 120);
+    return fail(e.message === 'conflict' ? 'Hubo un cruce de cambios, probá de nuevo' : `No se pudo guardar por un problema momentáneo. Esperá unos segundos y probá de nuevo. (${path} · ${det})`, 500);
   }
 };
 
