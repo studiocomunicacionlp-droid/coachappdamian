@@ -116,8 +116,24 @@ try {
   assert.ok(after.logs[ex0.id], 'se conserva lo registrado');
   step('el profe ve quién aceptó y le sube el nivel sin perder lo registrado');
 
-  // ---- cerrar la inscripción ----
+  // ---- biblioteca de programas ----
   await P.evaluate(() => { location.hash = 'summer'; });
+  await P.click('[data-sv="prog"]');
+  await P.getByText('Día 1 · Inferior A').waitFor();
+  await P.click('[data-pc="sex"][data-v="M"]');
+  await P.click('[data-pc="days"][data-v="3"]');
+  await P.click('[data-pc="goal"][data-v="dev"]');
+  await P.click('[data-pw="6"]');
+  await P.getByText('Día 3 · Hipertrofia general').waitFor();
+  await P.getByText(/Dropset en la última serie/).first().waitFor();
+  await shot(P, 's9-programas');
+  const pv = await api(P, 'summer/preview?sex=F&days=5&goal=recomp&level=beg');
+  assert.equal(pv.body.plan.length, 12);
+  assert.equal((await api(A, 'summer/preview?sex=F&days=5&goal=recomp&level=beg')).status, 403);
+  await P.click('[data-sv="ins"]');
+  step('el profe ve los programas por hombre/mujer, días, objetivo y nivel');
+
+  // ---- cerrar la inscripción ----
   await P.locator('#sum-open').uncheck();
   await P.waitForTimeout(900);
   const nc = await browser.newContext();

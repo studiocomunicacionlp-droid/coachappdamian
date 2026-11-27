@@ -603,6 +603,10 @@ a.btn{text-decoration:none;color:inherit}a.btn.y{color:var(--ink)}
 .rq strong{display:block;font-size:15px}.rq .m{font-size:12px;color:var(--mute);overflow-wrap:anywhere}.rq .m a{color:var(--y)}
 .acts2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.acts2 .btn{justify-content:center}
 .sumweek ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.pwk{display:flex;gap:6px;flex-wrap:wrap}.pwk button{min-width:44px;height:44px;border-radius:12px;border:2px solid var(--line);background:var(--s1);font-weight:700}.pwk button.on{border-color:var(--y);background:var(--y);color:var(--ink)}
+.pday{background:var(--s1);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.pex{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding-top:10px;border-top:1px solid var(--line)}
+.pex b{display:block}.pex .rx{font-family:var(--mono);font-size:12px;color:var(--y)}.pex .nt{font-size:13px;color:var(--mute)}
 .sumlog{margin:0;padding-left:18px;font-size:13px;color:var(--mute);display:flex;flex-direction:column;gap:4px}
 @media (max-width:520px){.choice.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.ch .big{font-size:32px}.ch{padding:10px}}
 </style>
@@ -1856,12 +1860,45 @@ function summerRegister(){
 }
 
 /* --- panel del profe / gestora: pestaña Summer --- */
+const SUMVIEW=()=>`<div class="seg" role="tablist" aria-label="Summer">${[['ins','Inscriptos'],['prog','Programas']].map(([k,n])=>`<button data-sv="${k}" class="${(S.sview||'ins')===k?'on':''}">${n}</button>`).join('')}</div>`;
+function bindSumView(){$$('[data-sv]').forEach(b=>b.onclick=()=>{S.sview=b.dataset.sv;render()})}
+// biblioteca: ver cada programa (hombre/mujer, días, objetivo, nivel) con sus 12 semanas
+function summerPrograms(){
+  const c=S.pcfg||(S.pcfg={sex:'F',days:4,goal:'recomp',level:'inter',prio:'pecho'}),wk=S.pwk||0;
+  const key=[c.sex,c.days,c.goal,c.level,c.sex==='M'&&c.goal==='dev'?c.prio:''].join('-'),cache=S.pcache||(S.pcache={}),d=cache[key];
+  const o=(k,v)=>c[k]===v?'on':'';
+  const users=summers().filter(s=>{const x=s.summer.config;return x&&x.sex===c.sex&&x.days===c.days&&x.goal===c.goal&&x.level===c.level}).length;
+  const w=d?.plan?.[wk];
+  $('#app').innerHTML=`<div class="stack" style="gap:24px">
+    ${topSeg()}${SUMVIEW()}
+    <div class="stack" style="gap:8px"><span class="lbl y">Summer Training</span><h1 style="font-size:clamp(44px,8vw,80px)">Programas</h1>
+      <p class="mute" style="margin:0">Elegí hombre o mujer, días, objetivo y nivel para ver la rutina que le arma la app a quien elige eso.</p></div>
+    <div class="choice c2"><button class="ch ${o('sex','F')}" data-pc="sex" data-v="F"><strong>Mujer</strong></button><button class="ch ${o('sex','M')}" data-pc="sex" data-v="M"><strong>Hombre</strong></button></div>
+    <div class="choice c3">${[3,4,5].map(n=>`<button class="ch ${o('days',n)}" data-pc="days" data-v="${n}"><span class="big">${n}</span><small>${SPLAN[c.sex+n]}</small></button>`).join('')}</div>
+    <div class="choice c2">${Object.entries(SGOAL).map(([k,[t]])=>`<button class="ch ${o('goal',k)}" data-pc="goal" data-v="${k}"><strong>${t}</strong></button>`).join('')}</div>
+    ${c.sex==='M'&&c.goal==='dev'?`<div class="q"><div class="qlbl"><i>+</i>Grupo prioritario (semanas 9 a 11)</div><div class="choice c3">${Object.entries(SPRIO).map(([k,t])=>`<button class="ch ${o('prio',k)}" data-pc="prio" data-v="${k}"><strong>${t}</strong></button>`).join('')}</div></div>`:''}
+    <div class="choice c2">${Object.entries(SLEVEL).map(([k,[t]])=>`<button class="ch ${o('level',k)}" data-pc="level" data-v="${k}"><strong>${t}</strong></button>`).join('')}</div>
+    <p class="note" style="margin:0;color:var(--fg)">${users?`<b>${users}</b> ${users===1?'persona tiene':'personas tienen'} este programa.`:'Nadie tiene este programa todavía.'}</p>
+    <div class="stack" style="gap:8px"><span class="lbl">Semana</span><div class="pwk">${Array.from({length:12},(_,i)=>`<button data-pw="${i}" class="${i===wk?'on':''}" aria-label="Semana ${i+1}">${i+1}</button>`).join('')}</div></div>
+    ${!d?'<p class="mute">Cargando…</p>':`
+      <div class="stack" style="gap:6px"><h2 class="sec-t">Semana ${wk+1} · ${esc(w.phase)}</h2><span class="mute" style="font-size:13px">${esc(d.label)}</span></div>
+      ${summerWeekCard(w)}
+      ${w.days.map((dd,i)=>`<section class="pday"><div class="row sp"><h3 style="font-family:var(--body);text-transform:none;font-size:18px;margin:0">Día ${i+1} · ${esc(dd.name)}</h3><span class="mute" style="font-size:13px">${dd.exercises.length} ejercicios</span></div>
+        ${dd.exercises.map(e=>`<div class="pex">${thumb(e,'sm')}<div><b>${esc(e.name)}</b><span class="rx">${e.sets} series · ${esc(e.reps)}${/seg/.test(e.reps)?'':' reps'}</span><div class="nt">${esc(e.notes)}</div></div></div>`).join('')}</section>`).join('')}
+      <p class="note" style="margin:0">${esc(d.cardio)}</p>`}
+  </div>`;
+  bindSeg();bindSumView();
+  $$('[data-pc]').forEach(b=>b.onclick=()=>{const k=b.dataset.pc;c[k]=k==='days'?+b.dataset.v:b.dataset.v;render()});
+  $$('[data-pw]').forEach(b=>b.onclick=()=>{S.pwk=+b.dataset.pw;render()});
+  if(!d&&!S.ploading){S.ploading=1;API('summer/preview?'+new URLSearchParams({sex:c.sex,days:c.days,goal:c.goal,level:c.level,prio:c.prio})).then(r=>{cache[key]=r}).catch(e=>toast(e.message)).finally(()=>{S.ploading=0;if(S.ttab==='summer'&&S.sview==='prog'&&S.view==='list')render()})}
+}
 function summerAdmin(){
+  if(S.sview==='prog')return summerPrograms();
   const cfg=SUMMER(),all=summers(),pend=all.filter(s=>s.summer.status==='pending').sort((a,b)=>a.summer.registeredAt-b.summer.registeredAt),
     acc=all.filter(s=>s.summer.status==='accepted').sort((a,b)=>b.summer.acceptedAt-a.summer.acceptedAt),rej=all.filter(s=>s.summer.status==='rejected');
   const link=location.origin+'/#summer';
   $('#app').innerHTML=`<div class="stack" style="gap:28px">
-    ${topSeg()}
+    ${topSeg()}${SUMVIEW()}
     <div class="stack" style="gap:8px"><span class="lbl y">Summer Training</span><h1 style="font-size:clamp(48px,9vw,88px)">Inscriptos <span class="mute">${all.length}</span></h1>
       <p class="mute" style="margin:0">Separados de los alumnos de siempre. Aceptá solo a quien ya pagó: queda registrado quién lo aceptó y cuándo.</p></div>
     <div class="meter" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div><div class="v" style="color:${pend.length?'var(--hot)':'var(--fg)'}">${pend.length}</div><div class="lbl">Pendientes</div></div>
@@ -1886,7 +1923,7 @@ function summerAdmin(){
       <div class="field" style="max-width:200px"><label for="sum-cupos">Cupos</label><input id="sum-cupos" inputmode="numeric" value="${cfg.cupos}"></div>
       <div class="field"><label>Link para que se inscriban (para la bio o las historias)</label><div class="row" style="gap:8px"><input readonly value="${esc(link)}" style="flex:1;min-width:0"><button class="btn sm" id="sum-copy">${ICON.copy}Copiar</button></div></div></section>
   </div>`;
-  bindSeg();
+  bindSeg();bindSumView();
   $$('[data-dec]').forEach(b=>b.onclick=async()=>{b.disabled=true;
     try{await flush();const r=await API('summer/decide',{body:{sid:b.dataset.sid,action:b.dataset.dec}});putStudent(r.student);render();toast({accept:'Aceptado. Ya puede armar su plan.',reject:'Inscripción rechazada',pending:'Volvió a pendientes'}[b.dataset.dec])}
     catch(e){b.disabled=false;toast(e.message)}});

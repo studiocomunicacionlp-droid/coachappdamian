@@ -53,6 +53,16 @@ export async function summerPrivate(req, seg, M, user) {
   if (seg[0] !== 'summer') return null;
   const staff = isStaff(user);
 
+  // ver cualquiera de los programas (profe y gestora): /api/summer/preview?sex=F&days=4&goal=dev&level=inter&prio=pecho
+  if (seg[1] === 'preview' && M === 'GET') {
+    if (!staff) return fail('No tenés permiso', 403);
+    const q = Object.fromEntries(new URL(req.url).searchParams);
+    const cfg = cleanConfig({ ...q, start: '2026-01-05' });
+    if (!cfg) return fail('Elegí programa, días, objetivo y nivel');
+    let n = 0;
+    return json({ plan: buildPlan(cfg, () => 'p' + n++), label: planLabel(cfg), cardio: cardioText(cfg) });
+  }
+
   // aceptar, rechazar o volver a pendiente: solo profe o gestora, y queda registrado quién fue
   if (seg[1] === 'decide' && M === 'POST') {
     if (!staff) return fail('No tenés permiso', 403);
