@@ -577,6 +577,34 @@ body{touch-action:pan-y pinch-zoom}
 .btn:disabled{opacity:.55;pointer-events:none}
 a.btn{text-decoration:none;color:inherit}a.btn.y{color:var(--ink)}
 
+/* Summer Training */
+.sumwrap{max-width:640px}
+.choice{display:grid;gap:8px}.choice.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.choice.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ch{border:2px solid var(--line);background:var(--s1);border-radius:16px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:3px;min-width:0;transition:border-color .15s,background .15s}
+.ch:hover{border-color:color-mix(in srgb,var(--y) 50%,var(--line))}.ch.on{border-color:var(--y);background:color-mix(in srgb,var(--y) 9%,var(--s1))}
+.ch strong{font-size:15px}.ch .big{font-family:var(--disp);font-weight:900;font-size:40px;line-height:.85}.ch.on .big{color:var(--y)}
+.ch small{font-size:12px;color:var(--mute);line-height:1.3;overflow-wrap:anywhere}
+.q{display:flex;flex-direction:column;gap:8px}.q .field{flex:none}.qlbl{display:flex;align-items:center;gap:8px;font-weight:700}
+.qlbl i{font-style:normal;width:24px;height:24px;border-radius:50%;background:var(--y);color:var(--ink);display:grid;place-items:center;font-size:13px}
+.wait{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding-top:20px}
+.clock{width:110px;height:110px;border-radius:50%;border:3px solid var(--line);position:relative;display:grid;place-items:center}
+.clock::before{content:"";position:absolute;inset:-3px;border-radius:50%;border:3px solid transparent;border-top-color:var(--y);animation:sumspin 1.6s linear infinite}
+.clock span{font-family:var(--disp);font-weight:900;font-size:44px;color:var(--y)}
+@keyframes sumspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.clock::before{animation:none}}
+.timeline{display:flex;flex-direction:column;width:100%}
+.tl{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;padding-bottom:16px}
+.tl .dot{width:28px;height:28px;border-radius:50%;background:var(--s2);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--mute)}
+.tl.ok .dot{background:var(--y);color:var(--ink)}.tl.now .dot{border:2px solid var(--y);color:var(--y);background:transparent}
+.tl strong{display:block;font-size:15px}.tl span{font-size:13px;color:var(--mute)}
+.rq{background:var(--s1);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px}
+.rq .top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.av{flex:none;width:44px;height:44px;border-radius:50%;background:var(--s2);display:grid;place-items:center;font-family:var(--disp);font-weight:900;font-size:20px;color:var(--y)}
+.rq strong{display:block;font-size:15px}.rq .m{font-size:12px;color:var(--mute);overflow-wrap:anywhere}.rq .m a{color:var(--y)}
+.acts2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.acts2 .btn{justify-content:center}
+.sumweek ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.sumlog{margin:0;padding-left:18px;font-size:13px;color:var(--mute);display:flex;flex-direction:column;gap:4px}
+@media (max-width:520px){.choice.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.ch .big{font-size:32px}.ch{padding:10px}}
 </style>
 </head>
 <body>
@@ -607,7 +635,8 @@ function thumb(e,cls=''){
 
 const SEED_PLAN = [{"week":1,"phase":"Base","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":4,"reps":"10"},{"name":"Peso Muerto Rumano","sets":4,"reps":"10"},{"name":"Búlgaras","sets":3,"reps":"15"},{"name":"Camilla Femoral","sets":3,"reps":"15"},{"name":"Abducción","sets":3,"reps":"15"},{"name":"Pallof Press","sets":4,"reps":"10"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":4,"reps":"10"},{"name":"Press Militar Máquina","sets":4,"reps":"10"},{"name":"Elevaciones Laterales","sets":3,"reps":"15"},{"name":"Aperturas","sets":3,"reps":"15"},{"name":"Fondos Asistidos","sets":3,"reps":"15"},{"name":"Extensión Tríceps","sets":3,"reps":"15"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":4,"reps":"10"},{"name":"Prensa","sets":4,"reps":"10"},{"name":"Extensión Cuádriceps","sets":3,"reps":"15"},{"name":"Step Up","sets":3,"reps":"15"},{"name":"Pantorrillas","sets":4,"reps":"10"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":4,"reps":"10"},{"name":"Remo Polea","sets":4,"reps":"10"},{"name":"Remo Unilateral","sets":3,"reps":"15"},{"name":"Face Pull","sets":3,"reps":"15"},{"name":"Curl Polea","sets":3,"reps":"15"},{"name":"Martillo","sets":3,"reps":"15"},{"name":"Dead Bug","sets":4,"reps":"10"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":4,"reps":"10"},{"name":"Patada Glúteo","sets":4,"reps":"10"},{"name":"Abducción","sets":3,"reps":"15"},{"name":"Pull Through","sets":3,"reps":"15"},{"name":"Camilla Isquios","sets":3,"reps":"15"},{"name":"Pantorrillas","sets":4,"reps":"10"},{"name":"Plancha lateral","sets":3,"reps":"15"}]}]},{"week":2,"phase":"Base","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":4,"reps":"10"},{"name":"Peso Muerto Rumano","sets":4,"reps":"10"},{"name":"Búlgaras","sets":3,"reps":"12"},{"name":"Camilla Femoral","sets":3,"reps":"12"},{"name":"Abducción","sets":3,"reps":"12"},{"name":"Pallof Press","sets":4,"reps":"10"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":4,"reps":"10"},{"name":"Press Militar Máquina","sets":4,"reps":"10"},{"name":"Elevaciones Laterales","sets":3,"reps":"12"},{"name":"Aperturas","sets":3,"reps":"12"},{"name":"Fondos Asistidos","sets":3,"reps":"12"},{"name":"Extensión Tríceps","sets":3,"reps":"12"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":4,"reps":"10"},{"name":"Prensa","sets":4,"reps":"10"},{"name":"Extensión Cuádriceps","sets":3,"reps":"12"},{"name":"Step Up","sets":3,"reps":"12"},{"name":"Pantorrillas","sets":4,"reps":"10"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":4,"reps":"10"},{"name":"Remo Polea","sets":4,"reps":"10"},{"name":"Remo Unilateral","sets":3,"reps":"12"},{"name":"Face Pull","sets":3,"reps":"12"},{"name":"Curl Polea","sets":3,"reps":"12"},{"name":"Martillo","sets":3,"reps":"12"},{"name":"Dead Bug con disco en mano","sets":4,"reps":"10"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":4,"reps":"10"},{"name":"Patada Glúteo","sets":4,"reps":"10"},{"name":"Abducción","sets":3,"reps":"12"},{"name":"Pull Through","sets":3,"reps":"12"},{"name":"Camilla Isquios","sets":3,"reps":"12"},{"name":"Pantorrillas","sets":4,"reps":"10"},{"name":"Plancha alta toco pies cruzado","sets":4,"reps":"20"}]}]},{"week":3,"phase":"Carga","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":5,"reps":"8"},{"name":"Peso Muerto Rumano","sets":5,"reps":"8"},{"name":"Búlgaras","sets":4,"reps":"12"},{"name":"Camilla Femoral","sets":4,"reps":"12"},{"name":"Abducción","sets":4,"reps":"12"},{"name":"Pallof Press","sets":4,"reps":"12"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":5,"reps":"8"},{"name":"Press Militar Máquina","sets":5,"reps":"8"},{"name":"Elevaciones Laterales","sets":4,"reps":"12"},{"name":"Aperturas","sets":4,"reps":"12"},{"name":"Fondos Asistidos","sets":4,"reps":"12"},{"name":"Extensión Tríceps","sets":4,"reps":"12"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":5,"reps":"8"},{"name":"Prensa","sets":5,"reps":"8"},{"name":"Extensión Cuádriceps","sets":4,"reps":"12"},{"name":"Step Up","sets":4,"reps":"12"},{"name":"Pantorrillas","sets":4,"reps":"12"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":5,"reps":"8"},{"name":"Remo Polea","sets":5,"reps":"8"},{"name":"Remo Unilateral","sets":4,"reps":"12"},{"name":"Face Pull","sets":4,"reps":"12"},{"name":"Curl Polea","sets":4,"reps":"12"},{"name":"Martillo","sets":4,"reps":"12"},{"name":"Dead Bug","sets":4,"reps":"12"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":5,"reps":"8"},{"name":"Patada Glúteo","sets":5,"reps":"8"},{"name":"Abducción","sets":4,"reps":"12"},{"name":"Pull Through","sets":4,"reps":"12"},{"name":"Camilla Isquios","sets":4,"reps":"12"},{"name":"Pantorrillas","sets":4,"reps":"12"},{"name":"Plancha lateral","sets":4,"reps":"12"}]}]},{"week":4,"phase":"Deload","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":3,"reps":"12"},{"name":"Peso Muerto Rumano","sets":3,"reps":"12"},{"name":"Búlgaras","sets":3,"reps":"12"},{"name":"Camilla Femoral","sets":3,"reps":"12"},{"name":"Abducción","sets":3,"reps":"12"},{"name":"Pallof Press","sets":3,"reps":"12"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":3,"reps":"12"},{"name":"Press Militar Máquina","sets":3,"reps":"12"},{"name":"Elevaciones Laterales","sets":3,"reps":"12"},{"name":"Aperturas","sets":3,"reps":"12"},{"name":"Fondos Asistidos","sets":3,"reps":"12"},{"name":"Extensión Tríceps","sets":3,"reps":"12"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":3,"reps":"12"},{"name":"Prensa","sets":3,"reps":"12"},{"name":"Extensión Cuádriceps","sets":3,"reps":"12"},{"name":"Step Up","sets":3,"reps":"12"},{"name":"Pantorrillas","sets":3,"reps":"12"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":3,"reps":"12"},{"name":"Remo Polea","sets":3,"reps":"12"},{"name":"Remo Unilateral","sets":3,"reps":"12"},{"name":"Face Pull","sets":3,"reps":"12"},{"name":"Curl Polea","sets":3,"reps":"12"},{"name":"Martillo","sets":3,"reps":"12"},{"name":"Dead Bug","sets":3,"reps":"12"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":3,"reps":"12"},{"name":"Patada Glúteo","sets":3,"reps":"12"},{"name":"Abducción","sets":3,"reps":"12"},{"name":"Pull Through","sets":3,"reps":"12"},{"name":"Camilla Isquios","sets":3,"reps":"12"},{"name":"Pantorrillas","sets":3,"reps":"12"},{"name":"Plancha alta toco pies cruzado","sets":3,"reps":"12"}]}]},{"week":5,"phase":"Hipertrofia","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":4,"reps":"8"},{"name":"Peso Muerto Rumano","sets":4,"reps":"8"},{"name":"Búlgaras","sets":4,"reps":"10"},{"name":"Camilla Femoral","sets":4,"reps":"10"},{"name":"Abducción","sets":4,"reps":"10"},{"name":"Pallof Press","sets":4,"reps":"10"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":4,"reps":"8"},{"name":"Press Militar Máquina","sets":4,"reps":"8"},{"name":"Elevaciones Laterales","sets":4,"reps":"10"},{"name":"Aperturas","sets":4,"reps":"10"},{"name":"Fondos Asistidos","sets":4,"reps":"10"},{"name":"Extensión Tríceps","sets":4,"reps":"10"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":4,"reps":"8"},{"name":"Prensa","sets":4,"reps":"8"},{"name":"Extensión Cuádriceps","sets":4,"reps":"10"},{"name":"Step Up","sets":4,"reps":"10"},{"name":"Pantorrillas","sets":4,"reps":"10"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":4,"reps":"8"},{"name":"Remo Polea","sets":4,"reps":"8"},{"name":"Remo Unilateral","sets":4,"reps":"10"},{"name":"Face Pull","sets":4,"reps":"10"},{"name":"Curl Polea","sets":4,"reps":"10"},{"name":"Martillo","sets":4,"reps":"10"},{"name":"Dead Bug","sets":4,"reps":"10"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":4,"reps":"8"},{"name":"Patada Glúteo","sets":4,"reps":"8"},{"name":"Abducción","sets":4,"reps":"10"},{"name":"Pull Through","sets":4,"reps":"10"},{"name":"Camilla Isquios","sets":4,"reps":"10"},{"name":"Pantorrillas","sets":4,"reps":"10"},{"name":"Plancha lateral","sets":4,"reps":"10"}]}]},{"week":6,"phase":"Hipertrofia","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":4,"reps":"8"},{"name":"Peso Muerto Rumano","sets":4,"reps":"8"},{"name":"Búlgaras","sets":4,"reps":"10"},{"name":"Camilla Femoral","sets":4,"reps":"10"},{"name":"Abducción","sets":4,"reps":"10"},{"name":"Pallof Press","sets":4,"reps":"10"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":4,"reps":"8"},{"name":"Press Militar Máquina","sets":4,"reps":"8"},{"name":"Elevaciones Laterales","sets":4,"reps":"10"},{"name":"Aperturas","sets":4,"reps":"10"},{"name":"Fondos Asistidos","sets":4,"reps":"10"},{"name":"Extensión Tríceps","sets":4,"reps":"10"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":4,"reps":"8"},{"name":"Prensa","sets":4,"reps":"8"},{"name":"Extensión Cuádriceps","sets":4,"reps":"10"},{"name":"Step Up","sets":4,"reps":"10"},{"name":"Pantorrillas","sets":4,"reps":"10"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":4,"reps":"8"},{"name":"Remo Polea","sets":4,"reps":"8"},{"name":"Remo Unilateral","sets":4,"reps":"10"},{"name":"Face Pull","sets":4,"reps":"10"},{"name":"Curl Polea","sets":4,"reps":"10"},{"name":"Martillo","sets":4,"reps":"10"},{"name":"Dead Bug","sets":4,"reps":"10"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":4,"reps":"8"},{"name":"Patada Glúteo","sets":4,"reps":"8"},{"name":"Abducción","sets":4,"reps":"10"},{"name":"Pull Through","sets":4,"reps":"10"},{"name":"Camilla Isquios","sets":4,"reps":"10"},{"name":"Pantorrillas","sets":4,"reps":"10"},{"name":"Plancha","sets":4,"reps":"10"}]}]},{"week":7,"phase":"Fuerza","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":5,"reps":"6"},{"name":"Peso Muerto Rumano","sets":5,"reps":"6"},{"name":"Búlgaras","sets":5,"reps":"6"},{"name":"Camilla Femoral","sets":4,"reps":"10"},{"name":"Abducción","sets":4,"reps":"10"},{"name":"Pallof Press","sets":4,"reps":"10"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":5,"reps":"6"},{"name":"Press Militar Máquina","sets":5,"reps":"6"},{"name":"Elevaciones Laterales","sets":4,"reps":"8"},{"name":"Aperturas","sets":4,"reps":"10"},{"name":"Fondos Asistidos","sets":4,"reps":"8"},{"name":"Extensión Tríceps","sets":4,"reps":"10"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":5,"reps":"6"},{"name":"Prensa","sets":5,"reps":"6"},{"name":"Extensión Cuádriceps","sets":4,"reps":"8"},{"name":"Step Up","sets":4,"reps":"10"},{"name":"Pantorrillas","sets":4,"reps":"10"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":5,"reps":"6"},{"name":"Remo Polea","sets":5,"reps":"6"},{"name":"Remo Unilateral","sets":4,"reps":"8"},{"name":"Face Pull","sets":4,"reps":"10"},{"name":"Curl Polea","sets":4,"reps":"10"},{"name":"Martillo","sets":4,"reps":"10"},{"name":"Dead Bug","sets":4,"reps":"10"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":5,"reps":"6"},{"name":"Patada Glúteo","sets":5,"reps":"6"},{"name":"Abducción","sets":4,"reps":"8"},{"name":"Pull Through","sets":4,"reps":"10"},{"name":"Camilla Isquios","sets":4,"reps":"10"},{"name":"Pantorrillas","sets":4,"reps":"10"},{"name":"Plancha alta toco pies cruzado","sets":4,"reps":"10"}]}]},{"week":8,"phase":"Deload","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":3,"reps":"10"},{"name":"Peso Muerto Rumano","sets":3,"reps":"10"},{"name":"Búlgaras","sets":3,"reps":"10"},{"name":"Camilla Femoral","sets":3,"reps":"10"},{"name":"Abducción","sets":3,"reps":"10"},{"name":"Pallof Press","sets":3,"reps":"10"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":3,"reps":"10"},{"name":"Press Militar Máquina","sets":3,"reps":"10"},{"name":"Elevaciones Laterales","sets":3,"reps":"10"},{"name":"Aperturas","sets":3,"reps":"10"},{"name":"Fondos Asistidos","sets":3,"reps":"10"},{"name":"Extensión Tríceps","sets":3,"reps":"10"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":3,"reps":"10"},{"name":"Prensa","sets":3,"reps":"10"},{"name":"Extensión Cuádriceps","sets":3,"reps":"10"},{"name":"Step Up","sets":3,"reps":"10"},{"name":"Pantorrillas","sets":3,"reps":"10"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":3,"reps":"10"},{"name":"Remo Polea","sets":3,"reps":"10"},{"name":"Remo Unilateral","sets":3,"reps":"10"},{"name":"Face Pull","sets":3,"reps":"10"},{"name":"Curl Polea","sets":3,"reps":"10"},{"name":"Martillo","sets":3,"reps":"10"},{"name":"Dead Bug","sets":3,"reps":"10"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":3,"reps":"10"},{"name":"Patada Glúteo","sets":3,"reps":"10"},{"name":"Abducción","sets":3,"reps":"10"},{"name":"Pull Through","sets":3,"reps":"10"},{"name":"Camilla Isquios","sets":3,"reps":"10"},{"name":"Pantorrillas","sets":3,"reps":"10"},{"name":"Plancha","sets":3,"reps":"10"}]}]},{"week":9,"phase":"Densidad","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":4,"reps":"8"},{"name":"Peso Muerto Rumano","sets":4,"reps":"8"},{"name":"Búlgaras","sets":4,"reps":"15"},{"name":"Camilla Femoral","sets":4,"reps":"15"},{"name":"Abducción","sets":4,"reps":"15"},{"name":"Pallof Press","sets":4,"reps":"15"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":4,"reps":"8"},{"name":"Press Militar Máquina","sets":4,"reps":"8"},{"name":"Elevaciones Laterales","sets":4,"reps":"15"},{"name":"Aperturas","sets":4,"reps":"15"},{"name":"Fondos Asistidos","sets":3,"reps":"15"},{"name":"Extensión Tríceps","sets":4,"reps":"15"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":4,"reps":"8"},{"name":"Prensa","sets":4,"reps":"8"},{"name":"Extensión Cuádriceps","sets":4,"reps":"15"},{"name":"Step Up","sets":4,"reps":"15"},{"name":"Pantorrillas","sets":4,"reps":"15"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":4,"reps":"8"},{"name":"Remo Polea","sets":4,"reps":"8"},{"name":"Remo Unilateral","sets":4,"reps":"15"},{"name":"Face Pull","sets":4,"reps":"15"},{"name":"Curl Polea","sets":4,"reps":"15"},{"name":"Martillo","sets":4,"reps":"15"},{"name":"Dead Bug","sets":4,"reps":"15"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":4,"reps":"8"},{"name":"Patada Glúteo","sets":4,"reps":"8"},{"name":"Abducción","sets":4,"reps":"15"},{"name":"Pull Through","sets":4,"reps":"15"},{"name":"Camilla Isquios","sets":4,"reps":"15"},{"name":"Pantorrillas","sets":4,"reps":"15"},{"name":"Plancha lateral","sets":3,"reps":"15"}]}]},{"week":10,"phase":"Densidad","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":5,"reps":"8"},{"name":"Peso Muerto Rumano","sets":4,"reps":"8"},{"name":"Búlgaras","sets":4,"reps":"10"},{"name":"Camilla Femoral","sets":4,"reps":"10"},{"name":"Abducción","sets":4,"reps":"10"},{"name":"Pallof Press","sets":4,"reps":"12"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":5,"reps":"8"},{"name":"Press Militar Máquina","sets":4,"reps":"8"},{"name":"Elevaciones Laterales","sets":4,"reps":"10"},{"name":"Aperturas","sets":4,"reps":"10"},{"name":"Fondos Asistidos SUPERSET","sets":3,"reps":"10"},{"name":"Extensión Tríceps SUPERSET","sets":3,"reps":"10"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":5,"reps":"8"},{"name":"Prensa","sets":4,"reps":"8"},{"name":"Extensión Cuádriceps","sets":4,"reps":"10"},{"name":"Step Up","sets":4,"reps":"10"},{"name":"Pantorrillas","sets":4,"reps":"12"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":5,"reps":"8"},{"name":"Remo Polea","sets":4,"reps":"8"},{"name":"Remo Unilateral","sets":4,"reps":"10"},{"name":"Face Pull","sets":4,"reps":"10"},{"name":"Curl Polea SUPERSET","sets":4,"reps":"10"},{"name":"Martillo SUPERSET","sets":3,"reps":"10"},{"name":"Dead Bug","sets":3,"reps":"12"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":5,"reps":"8"},{"name":"Patada Glúteo","sets":4,"reps":"8"},{"name":"Abducción","sets":4,"reps":"10"},{"name":"Pull Through","sets":4,"reps":"10"},{"name":"Camilla Isquios","sets":4,"reps":"10"},{"name":"Pantorrillas","sets":4,"reps":"12"},{"name":"Plancha alta toco pies cruzado","sets":4,"reps":"12"}]}]},{"week":11,"phase":"Pico","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":1,"reps":"6"},{"name":"Hip Thrust","sets":3,"reps":"10"},{"name":"Peso Muerto Rumano","sets":4,"reps":"8"},{"name":"Búlgaras","sets":4,"reps":"12"},{"name":"Camilla Femoral","sets":4,"reps":"12"},{"name":"Abducción","sets":4,"reps":"25"},{"name":"Pallof Press","sets":3,"reps":"10"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":1,"reps":"6"},{"name":"Press Inclinado Máquina","sets":3,"reps":"10"},{"name":"Press Militar Máquina","sets":4,"reps":"8"},{"name":"Elevaciones Laterales","sets":4,"reps":"12"},{"name":"Aperturas","sets":4,"reps":"12"},{"name":"Fondos Asistidos","sets":3,"reps":"10"},{"name":"Extensión Tríceps","sets":4,"reps":"20"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":1,"reps":"6"},{"name":"Sentadilla Landmine","sets":3,"reps":"10"},{"name":"Prensa","sets":4,"reps":"8"},{"name":"Extensión Cuádriceps","sets":4,"reps":"12"},{"name":"Step Up","sets":3,"reps":"12"},{"name":"Pantorrillas","sets":4,"reps":"25"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":1,"reps":"6"},{"name":"Jalón Supino","sets":3,"reps":"10"},{"name":"Remo Polea","sets":4,"reps":"8"},{"name":"Remo Unilateral","sets":4,"reps":"12"},{"name":"Face Pull","sets":4,"reps":"12"},{"name":"Curl Polea","sets":3,"reps":"15"},{"name":"Martillo","sets":3,"reps":"15"},{"name":"Dead Bug","sets":3,"reps":"20"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":1,"reps":"6"},{"name":"Hip Thrust Unilateral","sets":3,"reps":"10"},{"name":"Patada Glúteo","sets":4,"reps":"8"},{"name":"Abducción","sets":4,"reps":"25"},{"name":"Pull Through","sets":4,"reps":"12"},{"name":"Camilla Isquios","sets":3,"reps":"12"},{"name":"Pantorrillas","sets":3,"reps":"20"},{"name":"Plancha lateral","sets":3,"reps":"20"}]}]},{"week":12,"phase":"Deload","days":[{"name":"Día 1","exercises":[{"name":"Hip Thrust","sets":3,"reps":"12"},{"name":"Peso Muerto Rumano","sets":3,"reps":"12"},{"name":"Búlgaras","sets":3,"reps":"12"},{"name":"Camilla Femoral","sets":3,"reps":"12"},{"name":"Abducción","sets":3,"reps":"12"},{"name":"Pallof Press","sets":3,"reps":"12"}]},{"name":"Día 2","exercises":[{"name":"Press Inclinado Máquina","sets":3,"reps":"12"},{"name":"Press Militar Máquina","sets":3,"reps":"12"},{"name":"Elevaciones Laterales","sets":3,"reps":"12"},{"name":"Aperturas","sets":3,"reps":"12"},{"name":"Fondos Asistidos","sets":3,"reps":"12"},{"name":"Extensión Tríceps","sets":3,"reps":"12"}]},{"name":"Día 3","exercises":[{"name":"Sentadilla Landmine","sets":3,"reps":"12"},{"name":"Prensa","sets":3,"reps":"12"},{"name":"Extensión Cuádriceps","sets":3,"reps":"12"},{"name":"Step Up","sets":3,"reps":"12"},{"name":"Pantorrillas","sets":3,"reps":"12"}]},{"name":"Día 4","exercises":[{"name":"Jalón Supino","sets":3,"reps":"12"},{"name":"Remo Polea","sets":3,"reps":"12"},{"name":"Remo Unilateral","sets":3,"reps":"12"},{"name":"Face Pull","sets":3,"reps":"12"},{"name":"Curl Polea","sets":3,"reps":"12"},{"name":"Martillo","sets":3,"reps":"12"},{"name":"Dead Bug","sets":3,"reps":"12"}]},{"name":"Día 5","exercises":[{"name":"Hip Thrust Unilateral","sets":3,"reps":"12"},{"name":"Patada Glúteo","sets":3,"reps":"12"},{"name":"Abducción","sets":3,"reps":"12"},{"name":"Pull Through","sets":3,"reps":"12"},{"name":"Camilla Isquios","sets":3,"reps":"12"},{"name":"Pantorrillas","sets":3,"reps":"12"},{"name":"Plancha","sets":3,"reps":"12"}]}]}];
 const KEY='rutinas12-v4';
-const PHASES={Base:{h:.42,c:'#8f8b7c'},Carga:{h:.6,c:'#ffd21a'},Hipertrofia:{h:.72,c:'#ffd21a'},Fuerza:{h:.88,c:'#ff6a3d'},Densidad:{h:.8,c:'#8fe39b'},Pico:{h:1,c:'#ff6a3d'},Deload:{h:.24,c:'#4a4840'}};
+const PHASES={Base:{h:.42,c:'#8f8b7c'},Carga:{h:.6,c:'#ffd21a'},Hipertrofia:{h:.72,c:'#ffd21a'},Fuerza:{h:.88,c:'#ff6a3d'},Densidad:{h:.8,c:'#8fe39b'},Pico:{h:1,c:'#ff6a3d'},Deload:{h:.24,c:'#4a4840'},
+  'Adaptación':{h:.4,c:'#ffd21a'},'Más repeticiones':{h:.5,c:'#ffd21a'},'Sobrecarga':{h:.62,c:'#ffd21a'},'Descarga':{h:.24,c:'#4a4840'},'Reinicio':{h:.55,c:'#ffd21a'},'Superseries':{h:.75,c:'#ff6a3d'},'Intensificación':{h:.85,c:'#ff6a3d'},'Especialización':{h:.7,c:'#ffd21a'},'Sobrecarga específica':{h:.88,c:'#ff6a3d'},'Máxima exigencia':{h:1,c:'#ff6a3d'},'Evaluación':{h:.45,c:'#8fe39b'}};
 const sv=(p,o={})=>`<svg class="ico" viewBox="0 0 16 16" fill="${o.fill||'none'}" stroke="${o.fill?'none':'currentColor'}" stroke-width="${o.w||1.7}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const ICON={
   lock:sv('<rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>'),
@@ -771,8 +800,8 @@ function runMigrations(){
   setTimeout(()=>toast(hit.length?'Rutina nueva cargada para '+hit.map(s=>s.name).join(' y '):'Plantilla nueva lista: “Cintia | Lucia · noviembre”'),600);
 }
 function enter(user){
-  ME=user;S.role=user.role;S.open={};
-  if(user.role==='alumno'){S.sid=user.sid;const s=stu();S.week=s?curWeek(s):0;S.view='home';S.stab='rutina'}
+  ME=user;S.role=user.role==='alumno'?'alumno':'profe';S.open={};S.gest=null;S.gestCode=null;
+  if(user.role==='alumno'){S.sid=user.sid;const s=stu();S.week=s?.plan?.length?curWeek(s):0;S.view='home';S.stab='rutina'}
   else{S.view='list';S.ttab='alumnos';runMigrations()}
 }
 async function loadData(){
@@ -819,11 +848,12 @@ function bill(s){const b=s.billing||{};const left=b.end?diffD(b.end,TODAY):null;
 function alerts(){
   const out=[];
   db.students.forEach(s=>{
+    if(isSummer(s)&&!s.plan?.length)return;
     CT().rewards.forEach(r=>{const x=rStat(s,r);if(x.won&&!x.given)out.push({s,k:'medal',cls:'ok',t:`${s.name} ganó: ${r.prize}`,sub:rText(r)+'. Coordiná la entrega.',tab:'prog',o:1})});
     unseen(s).forEach(m=>out.push({s,k:'chat',cls:'y',t:`${s.name} comentó en ${m.ex.name}`,sub:'“'+m.text+'”',tab:'prog',o:1}));
     const lt=lastTrain(s),idle=lt?diffD(TODAY,lt):null;
     if(s.start<=TODAY&&totals(s).pct<100&&(idle==null?diffD(TODAY,s.start)>=3:idle>=5))out.push({s,k:'clock',cls:'hot',t:`${s.name} no entrena hace ${idle??diffD(TODAY,s.start)} días`,sub:lt?'Último entrenamiento: '+fdate(lt):'Todavía no empezó',tab:'prog',o:2});
-    const b=bill(s);
+    const b=isSummer(s)?{paid:true,left:null}:bill(s);
     if(b.left!=null&&b.left<0)out.push({s,k:'money',cls:'hot',t:`El plan de ${s.name} venció hace ${-b.left} días`,sub:'Renová el plan o registrá el pago',tab:'pagos',o:0});
     else if(b.left!=null&&b.left<=7)out.push({s,k:'money',cls:'y',t:`El plan de ${s.name} vence en ${b.left} días`,sub:'Vence el '+fdate(b.end),tab:'pagos',o:3});
     if(!b.paid)out.push({s,k:'money',cls:'hot',t:`${s.name} tiene el pago pendiente`,sub:'Plan de '+money(b.price),tab:'pagos',o:1});
@@ -844,10 +874,10 @@ function bindPeri(obj){$$('.wk').forEach(b=>b.onclick=()=>{S.week=+b.dataset.w;S
 
 function render(){
   const who=$('#who');
-  if(!S.role){who.innerHTML='';return login()}
+  if(!S.role){who.innerHTML='';return S.reg||location.hash==='#summer'?summerRegister():login()}
   const s=S.role==='alumno'?stu():null;
   if(S.role==='alumno'&&!s){who.innerHTML='<button class="btn sm ghost" id="out">Salir</button>';$('#out').onclick=logout;$('#app').innerHTML='<div class="stack"><h1>Todavía no hay rutina</h1><p class="mute">Tu profe todavía no te cargó o te dio de baja. Escribile para que lo revise.</p></div>';return}
-  who.innerHTML=`<span class="tag y">${S.role==='profe'?'Profesor':'Alumno'}</span><span class="nm">${S.role==='profe'?esc(ME?.name||'Panel del entrenador'):esc(s.name)}</span><button class="btn sm ghost" id="out">Salir</button>`;
+  who.innerHTML=`<span class="tag y">${ROLE_TXT[ME?.role]||'Alumno'}</span><span class="nm">${S.role==='profe'?esc(ME?.name||'Panel del entrenador'):esc(s.name)}</span><button class="btn sm ghost" id="out">Salir</button>`;
   $('#out').onclick=logout;
   S.role==='profe'?trainer():student();
   S.fx=null;S.fxPR=null;
@@ -872,7 +902,9 @@ function login(){
       <button class="btn y" id="lf-go" type="submit" style="justify-content:center">${setup?'Crear cuenta y entrar':'Entrar'} →</button>
       <p class="mute" id="lf-err" style="margin:0;font-size:14px;color:var(--hot)" hidden></p>
       ${setup?'':'<p class="note" style="margin:0">¿Sos alumno? Entrá con tu email y el código que te pasó tu profe. Si lo perdiste, pedile uno nuevo.</p>'}
+      ${setup?'':'<button class="btn" type="button" id="lf-summer" style="justify-content:center">☀ Summer Training: inscribite acá</button>'}
     </form></section>`;
+  $('#lf-summer')&&($('#lf-summer').onclick=async()=>{S.reg=true;try{S.sumOpen=(await API('summer/info')).open}catch(e){}render();scrollTo(0,0)});
   $('#lf').onsubmit=async ev=>{
     ev.preventDefault();
     const btn=$('#lf-go'),err=$('#lf-err'),email=$('#lf-email').value.trim(),password=$('#lf-pw').value;
@@ -890,6 +922,8 @@ function login(){
 /* ================= ALUMNO ================= */
 function student(){
   const s=stu();
+  if(isSummer(s)&&(s.summer.status!=='accepted'||!s.plan?.length))return summerGate(s);
+  if(S.week<0||S.week>=s.plan.length)S.week=curWeek(s);
   if(S.stab==='prog')return studentProg(s);
   if(S.stab==='med')return studentMed(s);
   if(S.stab==='comida')return studentFood(s);
@@ -985,7 +1019,8 @@ function studentHome(){
       <div><div class="v">${Math.round(ws.p*100)}<small>%</small></div><div class="lbl">Esta semana</div></div></div>
     ${secNav()}
     ${peri(s)}
-    ${s.notes?`<p class="note" style="margin:0;color:var(--fg)"><span class="lbl y" style="display:block;margin-bottom:2px">Tu profe dice</span>${esc(s.notes)}</p>`:''}
+    ${summerWeekCard(w)}
+    ${s.notes?`<p class="note" style="margin:0;color:var(--fg)"><span class="lbl y" style="display:block;margin-bottom:2px">${isSummer(s)?'Summer Training':'Tu profe dice'}</span>${esc(s.notes)}</p>`:''}
     <div class="daylist">${w.days.map((d,i)=>{const dn=dayDone(s,d),td=i===ti;
       const done=d.exercises.filter(e=>isDone(s,e)).length,r=s.rpe?.[S.week+'-'+i];
       return `<button class="dayrow ${dn?'done':''} ${td?'today':''}" data-d="${i}">
@@ -995,7 +1030,7 @@ function studentHome(){
     ${remindCard(s)}
     ${installCard()}
     <div class="lockline">${ICON.lock}Tu rutina la arma tu profesor. Si querés cambiar algo, escribile desde el ejercicio.</div>
-    <div class="lockline">${ICON.money}Tu plan de 3 meses vence el ${fdate(b.end)}.</div>
+    ${isSummer(s)?`<div class="lockline">${ICON.clock}Summer Training termina el ${fdate(addD(s.start,83))}.</div>`:`<div class="lockline">${ICON.money}Tu plan de 3 meses vence el ${fdate(b.end)}.</div>`}
   </div>`;
   bindPeri(s);bindRemind(s);bindInstall();
   $('#go')&&($('#go').onclick=()=>{S.day=ti;S.view='day';render();scrollTo(0,0)});
@@ -1176,7 +1211,7 @@ function hashFor(){
   if(S.role==='alumno'){if(S.stab==='prog')return 'progreso';if(S.stab==='med')return 'medidas';if(S.stab==='comida')return 'comida';if(S.stab==='mente')return 'mentalidad';if(S.stab==='premios')return 'premios';return S.view==='day'?`dia-${S.week+1}-${S.day+1}`:'rutina'}
   if(S.view==='tpl')return 'plantilla-'+S.tid;
   if(S.view==='student')return `alumno-${S.sid}-${S.tab}`;
-  return ['plantillas','mentalidad','premios'].includes(S.ttab)?S.ttab:'alumnos';
+  return ['plantillas','mentalidad','premios','summer'].includes(S.ttab)?S.ttab:'alumnos';
 }
 function applyHash(h){
   let m;
@@ -1187,7 +1222,7 @@ function applyHash(h){
     if((m=h.match(/^dia-(\d+)-(\d+)$/))){S.week=Math.max(0,Math.min(+m[1]-1,s.plan.length-1));S.day=Math.max(0,Math.min(+m[2]-1,s.plan[S.week].days.length-1));S.view='day'}
     return}
   S.role='profe';
-  if(['alumnos','plantillas','mentalidad','premios'].includes(h)){S.view='list';S.ttab=h;return}
+  if(['alumnos','plantillas','mentalidad','premios','summer'].includes(h)){S.view='list';S.ttab=h;return}
   if((m=h.match(/^alumno-([A-Za-z0-9_-]+)-(plan|comida|prog|med|pagos|data)$/))&&db.students.find(x=>x.id===m[1])){const was=S.sid;S.view='student';S.sid=m[1];S.tab=m[2];if(was!==m[1]){S.week=curWeek(stu());S.day=0}return}
   if((m=h.match(/^plantilla-([A-Za-z0-9_-]+)$/))&&db.templates.find(x=>x.id===m[1])){S.view='tpl';S.tid=m[1];return}
   S.view='list';S.ttab='alumnos';
@@ -1380,17 +1415,18 @@ function trainer(){
   if(S.view==='tpl'&&db.templates.find(t=>t.id===S.tid))return tplEdit();
   S.view==='student'&&stu()?trainerStudent():trainerList();
 }
-function topSeg(){return `<div class="seg tseg" role="tablist">${[['alumnos','Alumnos'],['plantillas','Plantillas'],['mentalidad','Mentalidad'],['premios','Premios']].map(([k,n])=>`<button data-tt="${k}" class="${S.ttab===k?'on':''}">${n}</button>`).join('')}</div>`}
+function topSeg(){return `<div class="seg tseg" role="tablist">${[['alumnos','Alumnos'],['summer','Summer'],['plantillas','Plantillas'],['mentalidad','Mentalidad'],['premios','Premios']].map(([k,n])=>{const c=k==='summer'?summers().filter(s=>s.summer.status==='pending').length:0;return `<button data-tt="${k}" class="${S.ttab===k?'on':''}">${n}${c?` <span class="cchip" style="background:var(--hot)">${c}</span>`:''}</button>`}).join('')}</div>`}
 function bindSeg(){$$('[data-tt]').forEach(b=>b.onclick=()=>{S.ttab=b.dataset.tt;S.view='list';render()})}
 const AIC={chat:ICON.chat,clock:ICON.clock,money:ICON.money,bolt:ICON.bolt,medal:ICON.medal};
 function trainerList(){
   if(S.ttab==='plantillas')return tplList();
   if(S.ttab==='mentalidad')return mindAdmin();
   if(S.ttab==='premios')return rewardsAdmin();
+  if(S.ttab==='summer')return summerAdmin();
   const al=alerts();
   $('#app').innerHTML=`<div class="stack" style="gap:28px">
     ${topSeg()}
-    <div class="row sp" style="align-items:flex-end"><div class="stack" style="gap:8px"><span class="lbl y">Panel del profesor</span><h1 style="font-size:clamp(48px,9vw,88px)">Alumnos <span class="mute">${db.students.length}</span></h1></div>
+    <div class="row sp" style="align-items:flex-end"><div class="stack" style="gap:8px"><span class="lbl y">Panel del profesor</span><h1 style="font-size:clamp(48px,9vw,88px)">Alumnos <span class="mute">${regulars().length}</span></h1></div>
       <button class="btn y" id="new">${ICON.plus}Nuevo alumno</button></div>
     <div id="nf" hidden class="drawer stack">
       <h2 style="font-size:30px">Nuevo alumno</h2>
@@ -1400,12 +1436,12 @@ function trainerList(){
         <div class="field"><label for="nf-goal">Objetivo</label><input id="nf-goal" placeholder="Ej: hipertrofia tren inferior"></div>
         <div class="field"><label for="nf-price">Precio del plan (3 meses)</label><input id="nf-price" inputmode="numeric" value="90000"></div></div>
       <div class="field" style="max-width:220px"><label for="nf-days">Días por semana</label><select id="nf-days"><option value="">Como la plantilla</option>${[2,3,4,5,6].map(n=>`<option value="${n}">${n} días</option>`).join('')}</select></div>
-      <div class="field"><label for="nf-tpl">Arrancar con</label><select id="nf-tpl">${db.templates.map(t=>`<option value="t:${t.id}">Plantilla: ${esc(t.name)}</option>`).join('')}${db.students.map(s=>`<option value="s:${s.id}">Copia del plan de ${esc(s.name)}</option>`).join('')}<option value="e:">Plan en blanco</option></select></div>
+      <div class="field"><label for="nf-tpl">Arrancar con</label><select id="nf-tpl">${db.templates.map(t=>`<option value="t:${t.id}">Plantilla: ${esc(t.name)}</option>`).join('')}${regulars().map(s=>`<option value="s:${s.id}">Copia del plan de ${esc(s.name)}</option>`).join('')}<option value="e:">Plan en blanco</option></select></div>
       <div class="row"><button class="btn y" id="nf-save">Crear alumno</button><button class="btn ghost" id="nf-cancel">Cancelar</button></div>
     </div>
     ${al.length?`<section class="stack" style="gap:10px"><div class="row sp"><h2 class="sec-t">Avisos</h2><span class="mute" style="font-size:13px">${al.length} para revisar</span></div>
       <div class="alerts">${al.map((a,i)=>`<button class="alert ${a.cls}" data-al="${i}"><span class="ai">${AIC[a.k]}</span><span style="min-width:0"><b>${esc(a.t)}</b><div class="sub">${esc(a.sub)}</div></span><span class="go">→</span></button>`).join('')}</div></section>`:''}
-    <div class="roster">${db.students.map(s=>{const t=totals(s),cw=curWeek(s),b=bill(s),lt=lastTrain(s),idle=lt?diffD(TODAY,lt):null,uc=unseen(s).length;return `
+    <div class="roster">${regulars().map(s=>{const t=totals(s),cw=curWeek(s),b=bill(s),lt=lastTrain(s),idle=lt?diffD(TODAY,lt):null,uc=unseen(s).length;return `
       <button class="rrow" data-id="${s.id}">
         <div style="min-width:0"><div class="nm">${esc(s.name)}</div><div class="goal">${esc(s.goal||'Sin objetivo')} · Sem ${cw+1} · ${esc(s.plan[cw]?.phase||'')}</div>
           <div class="badges">${uc?`<span class="bd y">${uc} comentario${uc>1?'s':''}</span>`:''}${idle!=null&&idle>=5?`<span class="bd hot">Inactivo ${idle} d</span>`:lt?`<span class="bd ok">Entrenó ${idle===0?'hoy':idle===1?'ayer':'hace '+idle+' d'}</span>`:''}${!b.paid?'<span class="bd hot">Pago pendiente</span>':b.left<0?'<span class="bd hot">Plan vencido</span>':b.left<=7?`<span class="bd y">Vence en ${b.left} d</span>`:`<span class="bd">Vence ${fdate(b.end)}</span>`}</div></div>
@@ -1415,9 +1451,10 @@ function trainerList(){
     <section class="stack" style="gap:12px"><h2 class="sec-t">Quién puede hacer qué</h2>
       <div class="perm"><div class="r h lbl"><span>Acción</span><span>Profesor</span><span>Alumno</span></div>
       ${[['Crear, editar y borrar alumnos',1,0],['Armar y cambiar la planificación',1,0],['Añadir, quitar o reordenar ejercicios',1,0],['Ver la rutina',1,'Solo la suya'],['Marcar series y anotar el peso usado',0,1],['Comentar un ejercicio','Responde',1],['Marcar el esfuerzo del día',0,1],['Cargar medidas y fotos',1,'Las suyas'],['Pagos, vencimientos y plantillas',1,0],['Mentalidad, alimentación y premios','Carga','Ve'],['Ver el progreso de todos',1,0]].map(r=>`<div class="r"><span>${r[0]}</span><span class="${r[1]?'yes':'nope'}">${r[1]===1?'Sí':r[1]||'No'}</span><span class="${r[2]?'yes':'nope'}">${r[2]===1?'Sí':r[2]||'No'}</span></div>`).join('')}</div></section>
+    ${gestorasCard()}
     ${accountCard()}
   </div>`;
-  bindSeg();bindAccount();
+  bindSeg();bindAccount();bindGest();
   $('#new').onclick=()=>{$('#nf').hidden=false;$('#nf-name').focus()};
   $('#nf-cancel').onclick=()=>$('#nf').hidden=true;
   $('#nf-save').onclick=async()=>{
@@ -1475,15 +1512,17 @@ function bindCode(s){
 }
 function trainerStudent(){
   const s=stu(),t=totals(s),uc=unseen(s).length,b=bill(s);
-  const tabs=[['plan','Planificación'],['prog','Progreso'+(uc?` <span class="cchip">${uc}</span>`:'')],['comida','Alimentación'],['med','Medidas'],['pagos','Pagos'+(!b.paid||b.left<=7?' <span class="cchip" style="background:var(--hot)">!</span>':'')],['data','Datos']];
+  const sm=isSummer(s);if(sm&&!s.plan?.length)S.tab='data';
+  const tabs=(sm&&!s.plan?.length)?[['data','Datos']]:[['plan','Planificación'],['prog','Progreso'+(uc?` <span class="cchip">${uc}</span>`:'')],['comida','Alimentación'],['med','Medidas'],...(sm?[]:[['pagos','Pagos'+(!b.paid||b.left<=7?' <span class="cchip" style="background:var(--hot)">!</span>':'')]]),['data','Datos']];
+  if(!tabs.some(x=>x[0]===S.tab))S.tab='plan';
   $('#app').innerHTML=`<div class="stack" style="gap:22px">
-    <button class="btn sm ghost" id="back" style="align-self:flex-start">${ICON.back}Alumnos</button>
-    <div class="row sp" style="align-items:flex-end"><div class="stack" style="gap:8px"><span class="lbl">${esc(s.email||'Sin email')} · inicio ${fdate(s.start)}</span><h1 style="font-size:clamp(48px,9vw,84px)">${esc(s.name)}</h1></div>
-      <div class="meter" style="min-width:260px"><div><div class="v">${t.pct}<small>%</small></div><div class="lbl">Completado</div></div><div><div class="v">${curWeek(s)+1}<small>/12</small></div><div class="lbl">Semana</div></div></div></div>
+    <button class="btn sm ghost" id="back" style="align-self:flex-start">${ICON.back}${sm?'Summer':'Alumnos'}</button>
+    <div class="row sp" style="align-items:flex-end"><div class="stack" style="gap:8px"><span class="lbl">${sm?'<span class="tag y">Summer</span> ':''}${esc(s.email||'Sin email')} · inicio ${fdate(s.start)}</span><h1 style="font-size:clamp(48px,9vw,84px)">${esc(s.name)}</h1></div>
+      <div class="meter" style="min-width:260px"><div><div class="v">${t.pct}<small>%</small></div><div class="lbl">Completado</div></div><div><div class="v">${s.plan?.length?curWeek(s)+1:0}<small>/12</small></div><div class="lbl">Semana</div></div></div></div>
     ${codeCard(s)}
     <div class="tabs" role="tablist">${tabs.map(([k,n])=>`<button class="tab ${S.tab===k?'on':''}" data-t="${k}">${n}</button>`).join('')}</div>
     <div id="tb"></div></div>`;
-  $('#back').onclick=()=>goBack(()=>{S.view='list'});
+  $('#back').onclick=()=>goBack(()=>{S.view='list';if(sm)S.ttab='summer'});
   bindCode(s);
   $$('.tab').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;render()});
   ({plan:()=>planEditor(s,false),comida:tabFood,prog:tabProg,med:tabMed,pagos:tabPagos,data:tabData})[S.tab](s);
@@ -1622,6 +1661,7 @@ function tabData(s){
     <div class="row"><div class="field"><label for="d-start">Inicio</label><input id="d-start" type="date" value="${esc(s.start)}"></div><div class="field"><label for="d-goal">Objetivo</label><input id="d-goal" value="${esc(s.goal)}"></div></div>
     <div class="field"><label for="d-notes">Mensaje para el alumno (lo ve arriba de su rutina)</label><textarea id="d-notes" rows="3">${esc(s.notes)}</textarea></div>
     <div class="row"><button class="btn y" id="d-save">Guardar cambios</button></div></div>
+    ${isSummer(s)?summerDataCard(s):''}
     <section class="card stack"><h3>Acceso a la app</h3>
       <p class="mute" style="margin:0;font-size:14px">${esc(s.name)} entra con su email <b style="color:var(--fg)">${esc(s.email)}</b> y su código. Si lo perdió, generá uno nuevo: el anterior deja de funcionar.</p>
       <div class="row"><button class="btn" id="d-code">${ICON.lock}Generar código nuevo</button></div></section>
@@ -1632,6 +1672,7 @@ function tabData(s){
     <div><button class="btn warn" id="d-del">Borrar alumno</button><div id="d-confirm" style="margin-top:10px"></div></div></div>`;
   $('#d-save').onclick=()=>{const em=$('#d-email').value.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){toast('Ese email no es válido');return}
     ['name','email','start','goal','notes'].forEach(k=>s[k]=$('#d-'+k).value.trim());s.email=s.email.toLowerCase();save();render();toast('Datos guardados')};
+  isSummer(s)&&bindSummerData(s);
   $('#d-code').onclick=async()=>{try{await flush();const r=await API('students/'+s.id+'/code',{body:{}});S.open.code={sid:s.id,code:r.code};render();scrollTo(0,0)}catch(e){toast(e.message)}};
   $('#tp-save').onclick=()=>{const n=$('#tp-name').value.trim()||'Plantilla';db.templates.push({id:uid(),name:n,desc:'Creada desde el plan de '+s.name,plan:withIds(clone(s.plan))});save();toast('Plantilla “'+n+'” guardada')};
   $('#tp-go').onclick=()=>{const t=db.templates.find(x=>x.id===$('#tp-apply').value);$('#tp-c').innerHTML=`<div class="confirm"><span>Se reemplaza la planificación de ${esc(s.name)} por “${esc(t.name)}” y se borra lo que registró en ella.</span><button class="btn sm warn" id="tp-yes">Sí, reemplazar</button><button class="btn sm ghost" id="tp-no">Cancelar</button></div>`;
@@ -1674,6 +1715,205 @@ function tplEdit(){
   $('#tpl-desc').onchange=e=>{t.desc=e.target.value.trim();save()};
   planEditor(t,true);
 }
+/* ================= SUMMER TRAINING · GESTORAS ================= */
+const ROLE_TXT={profe:'Profesor',gestora:'Gestora',alumno:'Alumno'};
+const isSummer=s=>!!s?.summer;
+const regulars=()=>db.students.filter(s=>!s.summer);
+const summers=()=>db.students.filter(s=>s.summer);
+const SUMMER=()=>({open:true,cupos:20,...(CT().summer||{})});
+const SGOAL={recomp:['Recomposición corporal','Bajar grasa y mantener o ganar músculo. Más cardio.'],dev:['Desarrollo muscular','Ganar músculo y fuerza. Volumen completo.']};
+const SLEVEL={beg:['Principiante','Menos series, sin técnicas intensivas. Foco en técnica.'],inter:['Intermedio','Series completas y métodos intensivos.']};
+const SPRIO={pecho:'Pecho',espalda:'Espalda',hombros:'Hombros',brazos:'Brazos',piernas:'Piernas'};
+const SPLAN={F3:'Full Body con énfasis inferior',F4:'Inferior / Superior',F5:'Especialización inferior',M3:'Full Body',M4:'Torso / Pierna',M5:'Push / Pull / Legs + Torso / Pierna'};
+const when=ms=>{if(!ms)return '';const d=new Date(ms);return d.getDate()+' '+MES[d.getMonth()]+' · '+pad(d.getHours())+':'+pad(d.getMinutes())+' h'};
+const byTxt=b=>b?`${esc(b.name||b.email)} (${ROLE_TXT[b.role]||b.role})`:'';
+const nextMonday=()=>{const d=new Date(TODAY+'T12:00'),k=(8-d.getDay())%7;return k===0?TODAY:addD(TODAY,k)};
+// reemplaza un alumno con lo que devolvió el servidor, sin generar cambios para mandar
+function putStudent(doc){for(const list of [db.students,snap.students]){const i=list.findIndex(x=>x.id===doc.id);if(i<0)list.push(clone(doc));else list[i]=clone(doc)}keep()}
+function sumTimeline(s){const st=s.summer.status,ok=st==='accepted';
+  return `<div class="timeline">
+    <div class="tl ok"><span class="dot">✓</span><div><strong>Inscripción enviada</strong><span>${esc(s.email)}</span></div></div>
+    <div class="tl ${ok?'ok':'now'}"><span class="dot">${ok?'✓':'2'}</span><div><strong>Te aceptan cuando se confirma el pago</strong><span>${ok?'Listo':'Suele tardar menos de un día'}</span></div></div>
+    <div class="tl ${ok?'now':''}"><span class="dot">3</span><div><strong>Elegís tu plan y empezás</strong><span>Programa, días, objetivo, nivel y fecha</span></div></div></div>`}
+
+/* --- la persona inscripta, antes de tener su plan --- */
+function summerGate(s){
+  const st=s.summer.status;
+  if(st==='accepted')return summerSetup(s);
+  $('#app').innerHTML=st==='rejected'
+    ?`<div class="stack sumwrap"><span class="lbl y">Summer Training</span><h1>No pudimos confirmar tu lugar</h1><p class="mute">Tu inscripción no fue aceptada. Si ya pagaste, escribinos por Instagram o WhatsApp con el mail <b style="color:var(--fg)">${esc(s.email)}</b> y lo revisamos.</p></div>`
+    :`<div class="stack sumwrap"><div class="wait"><div class="clock"><span>…</span></div><span class="lbl y">Summer Training</span><h1 style="font-size:clamp(40px,9vw,60px)">Esperando confirmación</h1>
+      <p class="mute" style="margin:0">Hola ${esc(s.name)}, tu inscripción llegó. Cuando se confirme tu pago te aceptamos y acá mismo vas a poder armar tu plan.</p></div>
+      ${sumTimeline(s)}
+      <div class="remind"><div style="font-weight:700">Enterate apenas te acepten</div>${PUSH==='on'?'<div class="mute" style="font-size:13px">Avisos activados: te llega una notificación.</div>':pushHint()}</div>
+      ${installCard()}
+      <button class="btn" id="sum-check" style="align-self:flex-start">Ya pagué, revisar de nuevo</button></div>`;
+  bindInstall();
+  $('#sum-check')&&($('#sum-check').onclick=async()=>{await refresh(true);toast(stu()?.summer?.status==='accepted'?'¡Te aceptaron!':'Todavía está pendiente')});
+}
+function setupForm(c,staff){
+  const o=(k,v)=>c[k]===v?'on':'';
+  return `<div class="q"><div class="qlbl"><i>1</i>Programa</div><div class="choice c2">
+      <button class="ch ${o('sex','F')}" data-c="sex" data-v="F"><strong>Femenino</strong><small>Énfasis en tren inferior y glúteos</small></button>
+      <button class="ch ${o('sex','M')}" data-c="sex" data-v="M"><strong>Masculino</strong><small>Equilibrado, con un grupo prioritario</small></button></div></div>
+    <div class="q"><div class="qlbl"><i>2</i>Días por semana</div><div class="choice c3">
+      ${[3,4,5].map(d=>`<button class="ch ${o('days',d)}" data-c="days" data-v="${d}"><span class="big">${d}</span><small>${SPLAN[c.sex+d]}</small></button>`).join('')}</div></div>
+    <div class="q"><div class="qlbl"><i>3</i>Objetivo</div><div class="choice c2">
+      ${Object.entries(SGOAL).map(([k,[t,d]])=>`<button class="ch ${o('goal',k)}" data-c="goal" data-v="${k}"><strong>${t}</strong><small>${d}</small></button>`).join('')}</div></div>
+    ${c.goal==='dev'&&c.sex==='M'?`<div class="q"><div class="qlbl"><i>+</i>Grupo prioritario (semanas 9 a 11)</div><div class="choice c3">${Object.entries(SPRIO).map(([k,t])=>`<button class="ch ${o('prio',k)}" data-c="prio" data-v="${k}"><strong>${t}</strong></button>`).join('')}</div></div>`:''}
+    <div class="q"><div class="qlbl"><i>4</i>Nivel</div><div class="choice c2">
+      ${Object.entries(SLEVEL).map(([k,[t,d]])=>`<button class="ch ${o('level',k)}" data-c="level" data-v="${k}"><strong>${t}</strong><small>${d}</small></button>`).join('')}</div>
+      ${staff?'':'<div class="note">Elegí <b>Intermedio</b> solo si entrenás hace más de 6 meses seguidos y hacés bien sentadilla, peso muerto y press. Si dudás, empezá como Principiante: el profe te puede subir de nivel.</div>'}</div>
+    <div class="q"><div class="qlbl"><i>5</i>Fecha de inicio</div>
+      <div class="field" style="max-width:240px"><input id="s-start" type="date" value="${esc(c.start)}" aria-label="Fecha de inicio"></div>
+      <span class="mute" style="font-size:13px">Terminás el ${fdate(addD(c.start,83))}.</span></div>`;
+}
+function bindSetupForm(c){
+  $$('[data-c]').forEach(b=>b.onclick=()=>{const k=b.dataset.c,v=b.dataset.v;c[k]=k==='days'?+v:v;render()});
+  $('#s-start').onchange=e=>{if(e.target.value){c.start=e.target.value;render()}};
+}
+function summerSetup(s){
+  const c=S.scfg||(S.scfg={sex:'F',days:4,goal:'recomp',level:'beg',prio:'pecho',start:nextMonday()});
+  $('#app').innerHTML=`<div class="stack sumwrap" style="gap:22px">
+    <div class="stack" style="gap:8px"><span class="lbl y">¡Te aceptaron! · Último paso</span><h1 style="font-size:clamp(40px,9vw,64px)">Armá tu plan</h1>
+      <p class="mute" style="margin:0">Elegí estas 5 cosas y la app arma tus 12 semanas.</p></div>
+    ${setupForm(c,false)}
+    <button class="btn y" id="s-go" style="justify-content:center">Empezar mi plan →</button>
+    <p class="mute" style="font-size:12px;margin:0">Summer Training es una guía general de entrenamiento y no reemplaza una evaluación individual. Adaptá las cargas a tu técnica. No entrenes con dolor; ante dolor persistente o lesiones consultá a un profesional.</p></div>`;
+  bindSetupForm(c);
+  $('#s-go').onclick=async()=>{const b=$('#s-go');b.disabled=true;
+    try{await flush();const r=await API('summer/setup',{body:{config:c}});putStudent(r.student);S.week=curWeek(stu());S.view='home';S.stab='rutina';render();scrollTo(0,0);toast('¡Tu plan está listo!')}
+    catch(e){b.disabled=false;toast(e.message)}};
+}
+function summerWeekCard(w){
+  if(!w?.tips?.length)return '';
+  return `<div class="card stack sumweek" style="gap:10px"><div class="row sp"><span class="lbl y">Qué hacer esta semana</span>${w.rir?`<span class="pill y">RIR ${esc(w.rir)}</span>`:''}</div>
+    <ul>${w.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+    ${w.rir?`<p class="mute" style="margin:0;font-size:13px"><b style="color:var(--fg)">RIR ${esc(w.rir)}</b> quiere decir que terminás cada serie sintiendo que te quedaban ${esc(w.rir)} repeticiones más.</p>`:''}</div>`;
+}
+
+/* --- registro (sin sesión) --- */
+function summerRegister(){
+  const open=S.sumOpen!==false;
+  if(S.sumOpen===undefined){S.sumOpen=null;API('summer/info').then(r=>{S.sumOpen=r.open;if(!S.role&&r.open===false)render()}).catch(()=>{})}
+  $('#app').innerHTML=`<section class="hero">
+    <div class="stack" style="gap:22px">
+      <div class="lbl y">Programa de 12 semanas</div>
+      <h1>Summer<em>Training.</em></h1>
+      <p>6 planes (femenino y masculino, de 3 a 5 días), 2 objetivos y cada semana te dice qué hacer. Lo hacés en cualquier gimnasio, con la app en el celular.</p>
+    </div>
+    <form class="drawer stack" id="rf" style="border-color:var(--line)" novalidate>
+      <h2 style="font-size:34px">Inscribite</h2>
+      ${open?`<p class="mute" style="margin:0;font-size:14px">Usá el mismo mail con el que pagaste, así te reconocemos.</p>
+      <div class="field"><label for="rf-name">Nombre y apellido</label><input id="rf-name" autocomplete="name" placeholder="Ana López"></div>
+      <div class="field"><label for="rf-email">Mail</label><input id="rf-email" type="email" autocomplete="email" inputmode="email" placeholder="ana@mail.com"></div>
+      <div class="field"><label for="rf-tel">WhatsApp (opcional)</label><input id="rf-tel" type="tel" autocomplete="tel" placeholder="11 5555 5555"></div>
+      <div class="field"><label for="rf-pw">Elegí una contraseña (6 o más)</label><input id="rf-pw" type="password" autocomplete="new-password"></div>
+      <button class="btn y" id="rf-go" type="submit" style="justify-content:center">Enviar inscripción →</button>
+      <p class="mute" id="rf-err" style="margin:0;font-size:14px;color:var(--hot)" hidden></p>`
+      :`<p style="margin:0">La inscripción está cerrada por ahora. Seguinos en Instagram para enterarte de la próxima.</p>`}
+      <button class="cbtn" type="button" id="rf-back">Ya tengo cuenta, entrar</button>
+    </form></section>`;
+  $('#rf-back').onclick=()=>{S.reg=false;try{history.replaceState(null,'',location.pathname)}catch(e){}render()};
+  if(!open)return;
+  $('#rf').onsubmit=async ev=>{
+    ev.preventDefault();
+    const btn=$('#rf-go'),err=$('#rf-err'),name=$('#rf-name').value.trim(),email=$('#rf-email').value.trim(),password=$('#rf-pw').value;
+    const bad=!name?'Escribí tu nombre':!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)?'Revisá el mail':password.length<6?'La contraseña tiene que tener 6 o más caracteres':'';
+    if(bad){err.textContent=bad;err.hidden=false;return}
+    btn.disabled=true;err.hidden=true;
+    try{
+      const r=await API('summer/register',{body:{name,email,phone:$('#rf-tel').value,password}});
+      ME=r.user;S.reg=false;await loadData();enter(r.user);render();scrollTo(0,0);initPush();
+    }catch(e){err.textContent=e.message;err.hidden=false;btn.disabled=false}
+  };
+}
+
+/* --- panel del profe / gestora: pestaña Summer --- */
+function summerAdmin(){
+  const cfg=SUMMER(),all=summers(),pend=all.filter(s=>s.summer.status==='pending').sort((a,b)=>a.summer.registeredAt-b.summer.registeredAt),
+    acc=all.filter(s=>s.summer.status==='accepted').sort((a,b)=>b.summer.acceptedAt-a.summer.acceptedAt),rej=all.filter(s=>s.summer.status==='rejected');
+  const link=location.origin+'/#summer';
+  $('#app').innerHTML=`<div class="stack" style="gap:28px">
+    ${topSeg()}
+    <div class="stack" style="gap:8px"><span class="lbl y">Summer Training</span><h1 style="font-size:clamp(48px,9vw,88px)">Inscriptos <span class="mute">${all.length}</span></h1>
+      <p class="mute" style="margin:0">Separados de los alumnos de siempre. Aceptá solo a quien ya pagó: queda registrado quién lo aceptó y cuándo.</p></div>
+    <div class="meter" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div><div class="v" style="color:${pend.length?'var(--hot)':'var(--fg)'}">${pend.length}</div><div class="lbl">Pendientes</div></div>
+      <div><div class="v">${acc.length}<small>/${cfg.cupos}</small></div><div class="lbl">Cupos usados</div></div>
+      <div><div class="v">${acc.filter(s=>(s.history||[]).some(h=>h.date===TODAY)).length}</div><div class="lbl">Entrenaron hoy</div></div></div>
+    <section class="stack" style="gap:10px"><h2 class="sec-t">Esperando aprobación</h2>
+      ${pend.length?pend.map(s=>`<div class="rq"><div class="top"><span class="av">${esc((s.name||'?')[0])}</span><div style="min-width:0;flex:1"><strong>${esc(s.name)}</strong>
+        <div class="m">${esc(s.email)}${s.phone?` · <a href="https://wa.me/${esc(s.phone.replace(/\D/g,''))}" target="_blank" rel="noopener">WhatsApp ${esc(s.phone)}</a>`:''} · se inscribió el ${when(s.summer.registeredAt)}</div></div></div>
+        <div class="acts2"><button class="btn warn" data-dec="reject" data-sid="${s.id}">Rechazar</button><button class="btn y" data-dec="accept" data-sid="${s.id}">✓ Aceptar</button></div></div>`).join('')
+      :'<p class="mute" style="margin:0">No hay inscripciones pendientes.</p>'}
+      ${acc.length>=cfg.cupos?`<p class="note" style="margin:0;color:var(--fg)">Ya se usaron los ${cfg.cupos} cupos. Podés seguir aceptando (segunda tanda) o cerrar la inscripción abajo.</p>`:''}</section>
+    <section class="stack" style="gap:10px"><h2 class="sec-t">Aceptados</h2>
+      ${acc.length?`<div class="roster">${acc.map(s=>{const has=s.plan?.length,cw=has?curWeek(s):0,t=has?totals(s):{pct:0},uc=unseen(s).length;return `<button class="rrow" data-sum="${s.id}">
+        <div style="min-width:0"><div class="nm">${esc(s.name)}</div><div class="goal">${has?esc(s.goal)+' · Sem '+(cw+1):'Todavía no armó su plan'}</div>
+          <div class="badges"><span class="bd ok">Aceptado por ${byTxt(s.summer.acceptedBy)} · ${when(s.summer.acceptedAt)}</span>${uc?`<span class="bd y">${uc} comentario${uc>1?'s':''}</span>`:''}</div></div>
+        <div class="pct">${t.pct}<small>%</small></div><span class="go">→</span></button>`}).join('')}</div>`
+      :'<p class="mute" style="margin:0">Todavía no hay aceptados.</p>'}</section>
+    ${rej.length?`<section class="stack" style="gap:10px"><h2 class="sec-t">Rechazados</h2>${rej.map(s=>`<div class="rq"><div class="top"><span class="av">${esc((s.name||'?')[0])}</span><div style="min-width:0;flex:1"><strong>${esc(s.name)}</strong><div class="m">${esc(s.email)} · rechazado por ${byTxt(s.summer.rejectedBy)} · ${when(s.summer.rejectedAt)}</div></div>
+      <button class="btn sm" data-dec="pending" data-sid="${s.id}">Volver a pendiente</button></div></div>`).join('')}</section>`:''}
+    <section class="card stack" style="gap:14px"><h3>Inscripción</h3>
+      <label class="row" style="gap:10px;cursor:pointer"><input type="checkbox" id="sum-open" ${cfg.open?'checked':''} style="width:22px;height:22px;accent-color:var(--y)"><span><b>Inscripción abierta</b><br><span class="mute" style="font-size:13px">Si la cerrás, nadie nuevo se puede anotar.</span></span></label>
+      <div class="field" style="max-width:200px"><label for="sum-cupos">Cupos</label><input id="sum-cupos" inputmode="numeric" value="${cfg.cupos}"></div>
+      <div class="field"><label>Link para que se inscriban (para la bio o las historias)</label><div class="row" style="gap:8px"><input readonly value="${esc(link)}" style="flex:1;min-width:0"><button class="btn sm" id="sum-copy">${ICON.copy}Copiar</button></div></div></section>
+  </div>`;
+  bindSeg();
+  $$('[data-dec]').forEach(b=>b.onclick=async()=>{b.disabled=true;
+    try{await flush();const r=await API('summer/decide',{body:{sid:b.dataset.sid,action:b.dataset.dec}});putStudent(r.student);render();toast({accept:'Aceptado. Ya puede armar su plan.',reject:'Inscripción rechazada',pending:'Volvió a pendientes'}[b.dataset.dec])}
+    catch(e){b.disabled=false;toast(e.message)}});
+  $$('[data-sum]').forEach(b=>b.onclick=()=>{S.sid=b.dataset.sum;const s=stu();Object.assign(S,{view:'student',week:s.plan?.length?curWeek(s):0,day:0,tab:s.plan?.length?'prog':'data'});render();scrollTo(0,0)});
+  $('#sum-open').onchange=e=>{CT().summer={...SUMMER(),open:e.target.checked};save();toast(e.target.checked?'Inscripción abierta':'Inscripción cerrada')};
+  $('#sum-cupos').onchange=e=>{const n=parseInt(e.target.value,10);if(n>0){CT().summer={...SUMMER(),cupos:n};save();render();toast('Cupos guardados')}};
+  $('#sum-copy').onclick=async()=>{try{await navigator.clipboard.writeText(link);toast('Link copiado')}catch(e){toast('No se pudo copiar')}};
+}
+// en la ficha (Datos) de un inscripto: quién lo aceptó y cambiar su programa
+function summerDataCard(s){
+  const sm=s.summer,c=S.scfgFor===s.id&&S.scfg?S.scfg:(S.scfgFor=s.id,S.scfg={sex:'F',days:4,goal:'recomp',level:'beg',prio:'pecho',start:s.start||nextMonday(),...(sm.config||{})});
+  const log=(sm.log||[]).map(l=>`<li>${when(l.at)} · ${esc({inscripción:'Se inscribió',accept:'Aceptado',reject:'Rechazado',pending:'Vuelto a pendiente','plan armado':'Armó su plan','cambio de plan':'Plan cambiado'}[l.what]||l.what)}${l.by?' por '+byTxt(l.by):''}</li>`).join('');
+  return `<section class="card stack" style="gap:14px"><h3>Summer Training</h3>
+    <p style="margin:0">${sm.status==='accepted'?`Aceptado por <b>${byTxt(sm.acceptedBy)}</b> el ${when(sm.acceptedAt)}.`:sm.status==='rejected'?`Rechazado por <b>${byTxt(sm.rejectedBy)}</b> el ${when(sm.rejectedAt)}.`:'Pendiente de aceptar.'}${s.phone?` WhatsApp: ${esc(s.phone)}.`:''}</p>
+    ${log?`<ul class="sumlog">${log}</ul>`:''}
+    ${sm.status==='accepted'?`<details ${S.open.sumPlan?'open':''} id="sum-det"><summary style="cursor:pointer;font-weight:700">${s.plan?.length?'Cambiar su programa (nivel, objetivo, días…)':'Armarle el programa'}</summary>
+      <div class="stack" style="gap:16px;margin-top:14px">${setupForm(c,true)}
+      <p class="mute" style="margin:0;font-size:13px">Se rearman las 12 semanas. Lo que ya registró se conserva en los ejercicios que siguen igual.</p>
+      <button class="btn y" id="s-go" style="align-self:flex-start">Guardar programa</button></div></details>`:''}</section>`;
+}
+function bindSummerData(s){
+  if(!$('#sum-det'))return;
+  $('#sum-det').ontoggle=e=>{S.open.sumPlan=e.target.open};
+  bindSetupForm(S.scfg);
+  $('#s-go').onclick=async()=>{const b=$('#s-go');b.disabled=true;
+    try{await flush();const r=await API('summer/setup',{body:{sid:s.id,config:S.scfg}});putStudent(r.student);S.open.sumPlan=false;S.week=curWeek(stu());render();toast('Programa guardado')}
+    catch(e){b.disabled=false;toast(e.message)}};
+}
+
+/* --- gestoras (solo el profe las crea) --- */
+function gestorasCard(){
+  if(ME?.role!=='profe')return '';
+  const list=S.gest||[];
+  return `<section class="stack" style="gap:12px"><h2 class="sec-t">Gestoras</h2>
+    <div class="remind"><p class="mute" style="margin:0;font-size:14px">Una gestora entra con su propio email y ve y maneja toda la app, igual que vos. Cuando acepta un inscripto de Summer queda registrado su nombre.</p>
+      ${list.length?list.map(g=>`<div class="row sp" style="gap:10px"><div style="min-width:0"><b>${esc(g.name)}</b><div class="mute" style="font-size:13px;overflow-wrap:anywhere">${esc(g.email)}</div></div>
+        <div class="row" style="gap:6px"><button class="btn sm" data-gcode="${esc(g.email)}">Código nuevo</button><button class="btn sm warn" data-gdel="${esc(g.email)}">Quitar</button></div></div>`).join(''):''}
+      ${S.gestCode?`<div class="drawer stack" style="gap:8px"><div>${esc(S.gestCode.email)} entra con su email y este código (después lo puede cambiar por una contraseña):</div><div class="rec" style="align-self:flex-start;padding:10px 18px"><div class="rec-v" style="letter-spacing:.12em">${esc(S.gestCode.code)}</div></div><span class="mute" style="font-size:13px">Anotalo: no se vuelve a mostrar.</span></div>`:''}
+      ${S.open.gnew?`<div class="row"><div class="field"><label for="g-name">Nombre</label><input id="g-name" placeholder="Lucia"></div><div class="field"><label for="g-email">Email</label><input id="g-email" type="email" placeholder="gestora@email.com"></div></div>
+        <div class="row"><button class="btn y sm" id="g-save">Crear gestora</button><button class="btn ghost sm" id="g-x">Cancelar</button></div>`:`<button class="cbtn" id="g-new">${ICON.plus}Sumar gestora</button>`}</div></section>`;
+}
+async function loadGest(){if(ME?.role!=='profe'||S.gest)return;try{S.gest=(await API('staff')).list;render()}catch(e){}}
+function bindGest(){
+  if(ME?.role!=='profe')return;
+  loadGest();
+  $('#g-new')&&($('#g-new').onclick=()=>{S.open.gnew=true;S.gestCode=null;render();$('#g-name').focus()});
+  $('#g-x')&&($('#g-x').onclick=()=>{S.open.gnew=false;render()});
+  $('#g-save')&&($('#g-save').onclick=async()=>{const email=$('#g-email').value.trim();try{const r=await API('staff',{body:{name:$('#g-name').value,email}});S.gest=r.list;S.gestCode={email,code:r.code};S.open.gnew=false;render();toast('Gestora creada')}catch(e){toast(e.message)}});
+  $$('[data-gcode]').forEach(b=>b.onclick=async()=>{try{const r=await API('staff/code',{body:{email:b.dataset.gcode}});S.gestCode={email:b.dataset.gcode,code:r.code};render()}catch(e){toast(e.message)}});
+  $$('[data-gdel]').forEach(b=>b.onclick=async()=>{if(S.open.gdel!==b.dataset.gdel){S.open.gdel=b.dataset.gdel;b.textContent='¿Seguro? Tocá de nuevo';return}
+    try{const r=await API('staff/'+encodeURIComponent(b.dataset.gdel),{method:'DELETE'});S.gest=r.list;S.gestCode=null;S.open.gdel=null;render();toast('Gestora quitada')}catch(e){toast(e.message)}});
+}
+
 async function boot(){
   $('#app').innerHTML='<p class="mute" style="padding:40px 0">Cargando…</p>';
   const c=cached();

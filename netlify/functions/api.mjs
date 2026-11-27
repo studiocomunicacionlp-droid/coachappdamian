@@ -3,6 +3,8 @@ import { getJSON, setJSON, del, store, listJSON, listKeys, updateJSON, secrets, 
 import { normEmail, userKey, hashPassword, checkPassword, accessCode, sessionCookie, clearCookie, currentUser } from '../lib/auth.mjs';
 import { allowed, applyOp, exName } from '../lib/logic.mjs';
 import { addSub, removeSub, notify, notifyProfes, pushKey } from '../lib/push.mjs';
+import { summerPublic, summerPrivate } from '../lib/summer-api.mjs';
+import { staffRoutes, isStaff } from '../lib/gestoras.mjs';
 
 export const config = { path: '/api/*' };
 
@@ -55,11 +57,15 @@ export default async (req, context) => {
       return json({ user: publicUser(user) }, 200, { 'set-cookie': await sessionCookie(user) });
     }
     if (path === 'logout' && M === 'POST') return json({ ok: true }, 200, { 'set-cookie': clearCookie() });
+    const pub = await summerPublic(req, seg, M);
+    if (pub) return pub;
 
     // ---------- con sesión ----------
     const user = await currentUser(req);
     if (!user) return fail('Tenés que iniciar sesión', 401);
-    const profe = user.role === 'profe';
+    const profe = isStaff(user); // el profe y las gestoras ven y manejan todo
+    const extra = (await summerPrivate(req, seg, M, user)) || (await staffRoutes(req, seg, M, user));
+    if (extra) return extra;
 
     if (path === 'data' && M === 'GET') {
       if (profe) {
@@ -127,7 +133,7 @@ export default async (req, context) => {
       if (prev) {
         // cuenta que quedó sola (alumno borrado o alta que se cortó a la mitad): se reutiliza
         const orphan = prev.role === 'alumno' && !(await getJSON('students/' + prev.sid));
-        if (!orphan) return fail(prev.role === 'profe' ? 'Ese email es el de la cuenta del profe, usá otro' : 'Ya hay un alumno con ese email', 409);
+        if (!orphan) return fail(prev.role === 'profe' ? 'Ese email es el de la cuenta del profe, usá otro' : prev.role === 'gestora' ? 'Ese email es de una gestora, usá otro' : 'Ya hay un alumno con ese email', 409);
       }
       const code = accessCode();
       const doc = { ...student, email, created: Date.now() };
